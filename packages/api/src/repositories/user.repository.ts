@@ -1,0 +1,13 @@
+import { EntityRepository, Repository } from 'typeorm';
+import { User } from '../entities/user.entity';
+
+@EntityRepository(User)
+export class UserRepository extends Repository<User> {
+  createAndSave(fullName: string, email: string, hashedPassword: string) {
+    const user = new User();
+    user.fullName = fullName;
+    user.email = email;
+    user.password = hashedPassword;
+    return this.manager.save(user);
+  }
+}

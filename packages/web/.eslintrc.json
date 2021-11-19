@@ -1,0 +1,11 @@
+{
+  "extends": ["../../.base.eslintrc.json", "next/core-web-vitals"],
+  "overrides": [
+    {
+      "files": ["./src/**/*.{ts,tsx}"],
+      "parserOptions": {
+        "project": ["./tsconfig.json"]
+      }
+    }
+  ]
+}

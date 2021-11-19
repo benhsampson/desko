@@ -1,0 +1,7 @@
+{
+  "extends": "../../base.tsconfig.json",
+  "include": ["src/**/*.{ts,tsx}"],
+  "compilerOptions": {
+    "jsx": "preserve"
+  }
+}
