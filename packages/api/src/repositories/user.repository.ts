@@ -10,4 +10,8 @@ export class UserRepository extends Repository<User> {
     user.password = hashedPassword;
     return this.manager.save(user);
   }
+
+  findByEmail(email: string) {
+    return this.manager.findOne(User, { where: { email } });
+  }
 }

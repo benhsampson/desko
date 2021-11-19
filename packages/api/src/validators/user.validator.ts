@@ -1,5 +1,5 @@
 import * as yup from 'yup';
-import { RegisterIn } from '../resolvers/user.resolver';
+import { LoginIn, RegisterIn } from '../types/user.type';
 
 export const registerSchema: yup.SchemaOf<RegisterIn> = yup.object().shape({
   fullName: yup.string().required(),
@@ -12,4 +12,9 @@ export const registerSchema: yup.SchemaOf<RegisterIn> = yup.object().shape({
       'Password must contain at least 1 uppercase letter, 1 lowercase letter, and 1 number'
     )
     .required(),
+});
+
+export const loginSchema: yup.SchemaOf<LoginIn> = yup.object().shape({
+  email: yup.string().required(),
+  password: yup.string().required(),
 });

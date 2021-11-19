@@ -3,12 +3,36 @@
 # !!!   DO NOT MODIFY THIS FILE BY YOURSELF   !!!
 # -----------------------------------------------
 
+type AuthOut {
+  accessToken: String
+  accessTokenExpiry: DateTime
+  errors: [UserError!]
+}
+
+"""
+The javascript `Date` as string. Type represents date and time as the ISO Date string.
+"""
+scalar DateTime
+
+input LoginIn {
+  email: String!
+  password: String!
+}
+
 type Mutation {
-  register(input: RegisterIn!): RegisterOut!
+  login(input: LoginIn!): AuthOut!
+  logout: Boolean!
+  refreshToken(input: RefreshTokenIn!): AuthOut!
+  register(input: RegisterIn!): AuthOut!
 }
 
 type Query {
   getStatus: StatusResponse!
+  userInfo: User!
+}
+
+input RefreshTokenIn {
+  refreshToken: String!
 }
 
 input RegisterIn {
@@ -17,13 +41,15 @@ input RegisterIn {
   password: String!
 }
 
-type RegisterOut {
-  accessToken: String
-  errors: [UserError!]
-}
-
 type StatusResponse {
   alive: Boolean!
+}
+
+type User {
+  email: String!
+  fullName: String!
+  id: String!
+  password: String!
 }
 
 type UserError {
