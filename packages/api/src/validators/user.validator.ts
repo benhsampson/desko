@@ -1,5 +1,10 @@
 import * as yup from 'yup';
-import { ChangePasswordIn, LoginIn, RegisterIn } from '../types/user.type';
+import {
+  ChangePasswordIn,
+  LoginIn,
+  RegisterIn,
+  ResetPasswordIn,
+} from '../types/user.type';
 
 const passwordSchema = yup
   .string()
@@ -28,4 +33,10 @@ export const changePasswordSchema: yup.SchemaOf<ChangePasswordIn> = yup
       .string()
       .oneOf([yup.ref('newPassword'), null], 'Passwords must match')
       .required(),
+  });
+
+export const resetPasswordSchema: yup.SchemaOf<ResetPasswordIn> = yup
+  .object()
+  .shape({
+    password: passwordSchema.required(),
   });

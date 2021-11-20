@@ -37,6 +37,18 @@ export class ChangePasswordIn {
   newPasswordConfirm!: string;
 }
 
+@InputType()
+export class ForgotPasswordIn {
+  @Field()
+  email!: string;
+}
+
+@InputType()
+export class ResetPasswordIn {
+  @Field()
+  password!: string;
+}
+
 @ObjectType()
 export class AuthOut {
   @Field(() => [UserError], { nullable: true })
@@ -51,6 +63,21 @@ export class AuthOut {
 
 @ObjectType()
 export class ChangePasswordOut {
+  @Field(() => [UserError], { nullable: true })
+  errors?: UserError[];
+}
+
+@ObjectType()
+export class ForgotPasswordOut {
+  @Field(() => [UserError], { nullable: true })
+  errors?: UserError[];
+
+  @Field({ nullable: true })
+  token?: string;
+}
+
+@ObjectType()
+export class ResetPasswordOut {
   @Field(() => [UserError], { nullable: true })
   errors?: UserError[];
 }

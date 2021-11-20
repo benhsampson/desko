@@ -36,7 +36,7 @@ const REDIS_PORT =
   const app = express();
   app.use(
     cors({
-      origin: process.env.CORS_ORIGIN,
+      origin: process.env.WEB_URL,
       credentials: true,
     })
   );

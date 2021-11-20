@@ -15,8 +15,7 @@ export class UserRepository extends Repository<User> {
     return this.manager.findOne(User, { where: { email } });
   }
 
-  async updatePasswordAndSave(userId: string, hashedPassword: string) {
-    const user = await this.findOneOrFail(userId);
+  updatePasswordAndSave(user: User, hashedPassword: string) {
     user.password = hashedPassword;
     return this.manager.save(user);
   }

@@ -59,6 +59,7 @@ function LoginPage() {
         {errors.password?.message}
         <button type="submit">login</button>
         <Link href="/register">register</Link>
+        <Link href="/forgot-password">forgot password</Link>
       </form>
     </div>
   );

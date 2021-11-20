@@ -23,6 +23,15 @@ The javascript `Date` as string. Type represents date and time as the ISO Date s
 """
 scalar DateTime
 
+input ForgotPasswordIn {
+  email: String!
+}
+
+type ForgotPasswordOut {
+  errors: [UserError!]
+  token: String
+}
+
 input LoginIn {
   email: String!
   password: String!
@@ -30,10 +39,12 @@ input LoginIn {
 
 type Mutation {
   changePassword(input: ChangePasswordIn!): ChangePasswordOut!
+  forgotPassword(input: ForgotPasswordIn!): ForgotPasswordOut!
   login(input: LoginIn!): AuthOut!
   logout: Boolean!
   refreshToken(input: RefreshTokenIn!): AuthOut!
   register(input: RegisterIn!): AuthOut!
+  resetPassword(input: ResetPasswordIn!, token: String!): ResetPasswordOut!
 }
 
 type Query {
@@ -50,6 +61,14 @@ input RegisterIn {
   email: String!
   fullName: String!
   password: String!
+}
+
+input ResetPasswordIn {
+  password: String!
+}
+
+type ResetPasswordOut {
+  errors: [UserError!]
 }
 
 type StatusResponse {
