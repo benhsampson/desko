@@ -1,4 +1,3 @@
-import getConfig from 'next/config';
 import { NextComponentType, NextPage, NextPageContext } from 'next';
 import {
   ApolloClient,
@@ -14,8 +13,9 @@ import { onError } from '@apollo/client/link/error';
 import { mergeDeep } from '@apollo/client/utilities';
 import nookies from 'nookies';
 
-import { ConfigVars } from '../types/ConfigVars';
-import { useAccessToken } from '../AccessToken';
+import config from './config';
+import { useAccessToken } from './useAccessToken';
+import { authenticateWithRefreshToken } from './authenticateWithRefreshToken';
 
 type ApolloState = NormalizedCacheObject;
 
@@ -37,14 +37,11 @@ type WithApolloComponent = NextComponentType<
   WithApolloParams
 >;
 
-const {
-  publicRuntimeConfig: { API_URL },
-} = getConfig() as ConfigVars;
 const SSR_MODE = typeof window === 'undefined';
 
 const initHttpLink = (headers = {}) =>
   createHttpLink({
-    uri: API_URL,
+    uri: config.API_URL,
     credentials: 'include',
     fetch: (input, init) =>
       fetch(input, {
@@ -68,45 +65,6 @@ const authMiddleware = new ApolloLink((operation, forward) => {
   return forward(operation);
 });
 
-type RefreshTokenResponse = {
-  errors?: [];
-  data?: {
-    refreshToken: {
-      accessToken?: string;
-      accessTokenExpiry?: string;
-    };
-  };
-};
-
-const authenticateWithRefreshToken = (oldRefreshToken: string) => {
-  return fetch(API_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    credentials: 'include',
-    body: JSON.stringify({
-      query: `
-        mutation RefreshToken($refreshToken: String!) {
-          refreshToken(input: { refreshToken: $refreshToken }) {
-              accessToken
-              accessTokenExpiry
-          }
-        }
-      `,
-      variables: {
-        refreshToken: oldRefreshToken,
-      },
-    }),
-  })
-    .then((res) => res.json() as RefreshTokenResponse)
-    .then(({ errors, data }) => {
-      if (errors || !data?.refreshToken.accessToken) return null;
-
-      useAccessToken().set(data.refreshToken.accessToken);
-
-      return data.refreshToken.accessToken;
-    });
-};
-
 const errorLink = onError(
   ({ networkError, graphQLErrors, operation, forward }) => {
     if (networkError) {
@@ -118,11 +76,9 @@ const errorLink = onError(
         case 'UNAUTHENTICATED':
           const oldRefreshToken = nookies.get()['refresh'];
 
-          console.log('OLD refresh', oldRefreshToken);
           if (!oldRefreshToken) return forward(operation);
 
           return new Observable((observer) => {
-            console.log('0');
             authenticateWithRefreshToken(oldRefreshToken)
               .then((newAccessToken) => {
                 console.log(newAccessToken);

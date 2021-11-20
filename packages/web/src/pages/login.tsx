@@ -2,17 +2,13 @@ import React, { useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import Link from 'next/link';
 
-import { useAccessToken } from '../lib/AccessToken';
 import withApollo from '../lib/utils/withApollo';
 import { LoginIn, useLoginMutation } from '../__generated__/graphql';
-import { useRouter } from 'next/router';
+import { useAuthenticate } from '../lib/utils/useAuthenticate';
 
 function LoginPage() {
-  const router = useRouter();
-
-  const accessToken = useAccessToken();
-
   const [login] = useLoginMutation();
+  const authenticate = useAuthenticate();
 
   const {
     register,
@@ -40,9 +36,7 @@ function LoginPage() {
     setGenericErrors([]);
 
     if (data?.login.accessToken) {
-      accessToken.set(data.login.accessToken);
-
-      await router.push('/protected');
+      await authenticate(data.login.accessToken);
     }
   };
 

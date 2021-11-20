@@ -4,9 +4,11 @@ import Link from 'next/link';
 
 import withApollo from '../lib/utils/withApollo';
 import { RegisterIn, useRegisterMutation } from '../__generated__/graphql';
+import { useAuthenticate } from '../lib/utils/useAuthenticate';
 
 function RegisterPage() {
   const [registerUser] = useRegisterMutation();
+  const authenticate = useAuthenticate();
 
   const {
     register,
@@ -32,7 +34,10 @@ function RegisterPage() {
     }
 
     setGenericErrors([]);
-    alert('Successful');
+
+    if (data?.register.accessToken) {
+      await authenticate(data.register.accessToken);
+    }
   };
 
   return (

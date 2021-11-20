@@ -1,6 +1,7 @@
 import { NextComponentType, NextPage, NextPageContext } from 'next';
 import { useRouter } from 'next/router';
-import { useAccessToken } from '../AccessToken';
+
+import { useAccessToken } from './useAccessToken';
 
 const IS_SERVER = typeof window === 'undefined';
 
@@ -14,14 +15,9 @@ function withAuth<P, IP>(Page: NextPage<P, IP>) {
     }
 
     if (!accessToken.value) {
-      router
-        .replace('/login')
-        .then(() => {
-          return null;
-        })
-        .catch((err) => {
-          throw err;
-        });
+      router.replace('/login').catch((err) => {
+        throw err;
+      });
       return null;
     }
 
