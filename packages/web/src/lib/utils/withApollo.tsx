@@ -39,18 +39,16 @@ type WithApolloComponent = NextComponentType<
 
 const SSR_MODE = typeof window === 'undefined';
 
-const initHttpLink = (headers = {}) =>
-  createHttpLink({
-    uri: config.API_URL,
-    credentials: 'include',
-    fetch: (input, init) =>
-      fetch(input, {
-        ...init,
-        headers: { ...init?.headers, ...headers },
-      }).then((res) => res),
-  });
+const httpLink = createHttpLink({
+  uri: config.API_URL,
+  credentials: 'include',
+  // fetch: (input, init) =>
+  //   fetch(input, {
+  //     ...init,
+  //   }).then((res) => res),
+});
 
-const authMiddleware = new ApolloLink((operation, forward) => {
+const authLink = new ApolloLink((operation, forward) => {
   const accessToken = useAccessToken()?.value;
 
   operation.setContext(({ headers = {} }) => ({
@@ -114,7 +112,7 @@ const errorLink = onError(
 const createApolloClient = () =>
   new ApolloClient({
     ssrMode: SSR_MODE,
-    link: from([errorLink, authMiddleware, initHttpLink()]),
+    link: from([errorLink, authLink, httpLink]),
     cache: new InMemoryCache(),
   });
 

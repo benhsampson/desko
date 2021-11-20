@@ -28,6 +28,7 @@ type Mutation {
 
 type Query {
   getStatus: StatusResponse!
+  isAuthenticated: Boolean!
   userInfo: User!
 }
 

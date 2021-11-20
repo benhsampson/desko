@@ -1,3 +1,4 @@
+import { AuthenticationError } from 'apollo-server-errors';
 import { GraphQLError } from 'graphql';
 import * as jwt from 'jsonwebtoken';
 import ms from 'ms';
@@ -99,12 +100,16 @@ export const validateAccessToken = (accessToken: string) => {
     throw new GraphQLError('Missing access token secret');
   }
 
-  const { id } = jwt.verify(
-    accessToken,
-    process.env.ACCESS_TOKEN_SECRET
-  ) as TokenPayload;
+  try {
+    const { id } = jwt.verify(
+      accessToken,
+      process.env.ACCESS_TOKEN_SECRET
+    ) as TokenPayload;
 
-  return id;
+    return id;
+  } catch (err) {
+    throw new AuthenticationError('Invalid JWT');
+  }
 };
 
 export const getUserIdFromContext = (ctx: Context) => {

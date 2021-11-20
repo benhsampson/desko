@@ -9,6 +9,7 @@ import {
   authenticate,
   deleteRefreshTokenCookieAndAssociation,
   getUserIdFromContextOrFail,
+  getUserIdFromContext,
 } from '../services/user.service';
 import { loginSchema, registerSchema } from '../validators/user.validator';
 import { validateInput } from '../utils/validateInput';
@@ -84,6 +85,11 @@ export class UserResolver {
     return { accessToken, accessTokenExpiry };
   }
 
+  @Query(() => Boolean)
+  isAuthenticated(@Ctx() ctx: Context) {
+    return !!getUserIdFromContext(ctx);
+  }
+
   @Query(() => User)
   @Authorized()
   async userInfo(@Ctx() ctx: Context): Promise<User> {
@@ -94,7 +100,7 @@ export class UserResolver {
 
   @Mutation(() => Boolean)
   @Authorized()
-  async logout(@Ctx() ctx: Context): Promise<boolean> {
+  async logout(@Ctx() ctx: Context) {
     const userId = getUserIdFromContextOrFail(ctx);
 
     await deleteRefreshTokenCookieAndAssociation(ctx, userId);

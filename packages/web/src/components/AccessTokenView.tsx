@@ -1,13 +1,13 @@
 import { observer } from 'mobx-react';
+import { AccessTokenObserverProps } from '../lib/types/AccessTokenObserverProps';
 
-import type { AccessToken } from '../lib/utils/useAccessToken';
-
-type Props = {
-  accessToken: AccessToken;
-};
-
-const AccessTokenView = observer(({ accessToken }: Props) => (
-  <span>{accessToken.value}</span>
-));
+const AccessTokenView = observer(
+  ({ accessToken }: AccessTokenObserverProps) => (
+    <>
+      <p>{accessToken.value}</p>
+      <p>{accessToken.expiry?.toLocaleTimeString()}</p>
+    </>
+  )
+);
 
 export default AccessTokenView;

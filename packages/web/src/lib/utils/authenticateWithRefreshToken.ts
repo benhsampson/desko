@@ -6,7 +6,7 @@ type RefreshTokenResponse = {
   data?: {
     refreshToken: {
       accessToken?: string;
-      accessTokenExpiry?: Date;
+      accessTokenExpiry?: string;
     };
   };
 };
@@ -42,7 +42,7 @@ export const authenticateWithRefreshToken = (oldRefreshToken: string) =>
 
       useAccessToken().set(
         data.refreshToken.accessToken,
-        data.refreshToken.accessTokenExpiry
+        new Date(data.refreshToken.accessTokenExpiry)
       );
 
       return data.refreshToken.accessToken;

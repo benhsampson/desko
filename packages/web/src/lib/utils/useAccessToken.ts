@@ -12,6 +12,11 @@ export class AccessToken {
     this.value = newValue;
     this.expiry = newExpiry;
   }
+
+  clear() {
+    this.value = null;
+    this.expiry = null;
+  }
 }
 
 let globalAccessToken: AccessToken | null = null;
