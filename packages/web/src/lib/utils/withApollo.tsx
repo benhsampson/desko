@@ -42,10 +42,6 @@ const SSR_MODE = typeof window === 'undefined';
 const httpLink = createHttpLink({
   uri: config.API_URL,
   credentials: 'include',
-  // fetch: (input, init) =>
-  //   fetch(input, {
-  //     ...init,
-  //   }).then((res) => res),
 });
 
 const authLink = new ApolloLink((operation, forward) => {
