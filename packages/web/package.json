@@ -4,9 +4,33 @@
   "main": "dist/index.js",
   "license": "MIT",
   "scripts": {
-    "dev": "next dev"
+    "codegen": "graphql-codegen",
+    "dev": "yarn codegen && next dev"
   },
   "devDependencies": {
+    "@graphql-codegen/cli": "^2.3.0",
+    "@graphql-codegen/import-types-preset": "^2.1.8",
+    "@graphql-codegen/introspection": "^2.1.0",
+    "@graphql-codegen/typescript": "^2.4.1",
+    "@graphql-codegen/typescript-operations": "^2.2.1",
+    "@graphql-codegen/typescript-react-apollo": "^3.2.2",
+    "@graphql-codegen/typescript-resolvers": "^2.4.2",
+    "@types/cookie": "^0.4.1",
+    "@types/js-cookie": "^3.0.1",
+    "@types/nookies": "^2.0.3",
+    "@types/react": "^17.0.35",
     "eslint-config-next": "^12.0.4"
+  },
+  "dependencies": {
+    "@apollo/client": "^3.4.17",
+    "deepmerge": "^4.2.2",
+    "lodash": "^4.17.21",
+    "mobx": "^6.3.7",
+    "mobx-react": "^7.2.1",
+    "next": "^12.0.4",
+    "nookies": "^2.5.2",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-hook-form": "^7.20.0"
   }
 }

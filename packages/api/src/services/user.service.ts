@@ -48,20 +48,6 @@ const generateUserTokens = (userId: string) =>
 const getRefreshTokenKey = (userId: string) =>
   `${REFRESH_TOKEN_REDIS_PREFIX}:${userId}`;
 
-const createRefreshTokenCookieAndAssociation = async (
-  ctx: Context,
-  refreshToken: string,
-  userId: string
-) => {
-  await ctx.redis.set(getRefreshTokenKey(userId), refreshToken);
-
-  ctx.res.cookie(REFRESH_TOKEN_COOKIE_NAME, refreshToken, {
-    httpOnly: true,
-    secure: IS_PROD,
-    domain: IS_PROD ? process.env.COOKIE_DOMAIN : '*',
-  });
-};
-
 export const deleteRefreshTokenCookieAndAssociation = async (
   ctx: Context,
   userId: string
@@ -95,7 +81,13 @@ export const authenticate = async (ctx: Context, userId: string) => {
   const { accessToken, refreshToken, accessTokenExpiry } =
     generateUserTokens(userId);
 
-  await createRefreshTokenCookieAndAssociation(ctx, refreshToken, userId);
+  await ctx.redis.set(getRefreshTokenKey(userId), refreshToken);
+
+  ctx.res.cookie(REFRESH_TOKEN_COOKIE_NAME, refreshToken, {
+    httpOnly: false,
+    secure: IS_PROD,
+    domain: process.env.COOKIE_DOMAIN,
+  });
 
   console.log('NEW REFRESH TOKEN', refreshToken);
 

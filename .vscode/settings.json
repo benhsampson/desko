@@ -1,3 +1,3 @@
 {
-  "eslint.workingDirectories": ["packages/api"]
+  "eslint.workingDirectories": ["packages/api", "packages/web"]
 }

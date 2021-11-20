@@ -9,10 +9,17 @@ node_modules/
 *.log
 npm-debug.log*
 
-.next
-out
+.next/
+out/
+next-env.d.ts
 
 dist/
 
 .vercel
 coverage/
+
+dump.rdb
+
+__generated__/
+*.graphql.d.ts
+*.graphqls.d.ts

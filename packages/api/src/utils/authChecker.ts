@@ -1,3 +1,4 @@
+import { AuthenticationError } from 'apollo-server-errors';
 import { AuthChecker } from 'type-graphql';
 import { getCustomRepository } from 'typeorm';
 
@@ -11,6 +12,6 @@ export const authChecker: AuthChecker<Context> = async ({ context }) => {
   if (userId) {
     return !!(await getCustomRepository(UserRepository).findOne(userId));
   } else {
-    return false;
+    throw new AuthenticationError('Unauthorized');
   }
 };

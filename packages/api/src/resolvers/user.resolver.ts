@@ -25,14 +25,6 @@ import { User } from '../entities/user.entity';
 export class UserResolver {
   userRepository = getCustomRepository(UserRepository);
 
-  @Query(() => User)
-  @Authorized()
-  async userInfo(@Ctx() ctx: Context): Promise<User> {
-    const userId = getUserIdFromContextOrFail(ctx);
-
-    return this.userRepository.findOneOrFail(userId);
-  }
-
   @Mutation(() => AuthOut)
   async register(
     @Arg('input') input: RegisterIn,
@@ -90,6 +82,14 @@ export class UserResolver {
     const { accessToken, accessTokenExpiry } = await authenticate(ctx, userId);
 
     return { accessToken, accessTokenExpiry };
+  }
+
+  @Query(() => User)
+  @Authorized()
+  async userInfo(@Ctx() ctx: Context): Promise<User> {
+    const userId = getUserIdFromContextOrFail(ctx);
+
+    return this.userRepository.findOneOrFail(userId);
   }
 
   @Mutation(() => Boolean)

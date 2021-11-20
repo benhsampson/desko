@@ -34,7 +34,12 @@ const REDIS_PORT =
     entities: [User],
   });
   const app = express();
-  app.use(cors({ origin: process.env.CORS_ORIGIN, credentials: true }));
+  app.use(
+    cors({
+      origin: process.env.CORS_ORIGIN,
+      credentials: true,
+    })
+  );
   const redis = new Redis(REDIS_PORT, process.env.REDIS_HOST);
   const schema = await buildSchema({
     resolvers: [StatusResolver, UserResolver],

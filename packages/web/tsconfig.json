@@ -1,7 +1,11 @@
 {
   "extends": "../../base.tsconfig.json",
-  "include": ["src/**/*.{ts,tsx}"],
+  "include": ["src/**/*.ts", "src/**/*.tsx"],
+  "exclude": ["node_modules", "__generated__"],
   "compilerOptions": {
-    "jsx": "preserve"
+    "jsx": "preserve",
+    "module": "esnext",
+    "noEmit": true,
+    "incremental": true
   }
 }
