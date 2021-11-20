@@ -2,13 +2,15 @@ import { makeAutoObservable } from 'mobx';
 
 export class AccessToken {
   value: string | null = null;
+  expiry: Date | null = null;
 
   constructor() {
     makeAutoObservable(this);
   }
 
-  set(newValue: string) {
+  set(newValue: string, newExpiry: Date) {
     this.value = newValue;
+    this.expiry = newExpiry;
   }
 }
 

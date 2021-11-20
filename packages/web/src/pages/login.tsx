@@ -35,8 +35,11 @@ function LoginPage() {
 
     setGenericErrors([]);
 
-    if (data?.login.accessToken) {
-      await authenticate(data.login.accessToken);
+    if (data?.login.accessToken && data.login.accessTokenExpiry) {
+      await authenticate(
+        data.login.accessToken,
+        new Date(data.login.accessTokenExpiry as string)
+      );
     }
   };
 

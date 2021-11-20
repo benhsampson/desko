@@ -36,6 +36,6 @@ export class AuthOut {
   @Field({ nullable: true })
   accessToken?: string;
 
-  @Field({ nullable: true })
+  @Field(() => Date, { nullable: true })
   accessTokenExpiry?: Date;
 }

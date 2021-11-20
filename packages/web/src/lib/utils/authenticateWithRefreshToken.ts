@@ -6,7 +6,7 @@ type RefreshTokenResponse = {
   data?: {
     refreshToken: {
       accessToken?: string;
-      accessTokenExpiry?: string;
+      accessTokenExpiry?: Date;
     };
   };
 };
@@ -32,9 +32,18 @@ export const authenticateWithRefreshToken = (oldRefreshToken: string) =>
   })
     .then((res) => res.json() as RefreshTokenResponse)
     .then(({ errors, data }) => {
-      if (errors || !data?.refreshToken.accessToken) return null;
+      if (
+        errors ||
+        !data?.refreshToken.accessToken ||
+        !data?.refreshToken.accessTokenExpiry
+      ) {
+        return null;
+      }
 
-      useAccessToken().set(data.refreshToken.accessToken);
+      useAccessToken().set(
+        data.refreshToken.accessToken,
+        data.refreshToken.accessTokenExpiry
+      );
 
       return data.refreshToken.accessToken;
     });

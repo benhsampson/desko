@@ -6,8 +6,8 @@ export const useAuthenticate = () => {
   const router = useRouter();
   const accessToken = useAccessToken();
 
-  return async (newAccessToken: string) => {
-    accessToken.set(newAccessToken);
+  return async (newAccessToken: string, newAccessTokenExpiry: Date) => {
+    accessToken.set(newAccessToken, newAccessTokenExpiry);
     await router.push('/protected');
   };
 };

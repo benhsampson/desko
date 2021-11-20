@@ -76,12 +76,11 @@ const errorLink = onError(
         case 'UNAUTHENTICATED':
           const oldRefreshToken = nookies.get()['refresh'];
 
-          if (!oldRefreshToken) return forward(operation);
+          if (!oldRefreshToken) return;
 
           return new Observable((observer) => {
             authenticateWithRefreshToken(oldRefreshToken)
               .then((newAccessToken) => {
-                console.log(newAccessToken);
                 operation.setContext(({ headers = {} }) => ({
                   headers: {
                     ...headers,
@@ -91,13 +90,13 @@ const errorLink = onError(
                   },
                 }));
               })
-              .then(() => {
+              .then(() =>
                 forward(operation).subscribe({
                   next: observer.next.bind(observer),
                   error: observer.error.bind(observer),
                   complete: observer.complete.bind(observer),
-                });
-              })
+                })
+              )
               .catch((err) => {
                 console.log('[Observer error]', err);
                 observer.error(err);
@@ -108,7 +107,7 @@ const errorLink = onError(
       }
     }
 
-    return forward(operation);
+    return;
   }
 );
 

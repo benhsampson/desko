@@ -1,7 +1,11 @@
 import getConfig from 'next/config';
 
-import { ConfigVars } from '../types/ConfigVars';
+type NextConfig = {
+  publicRuntimeConfig: {
+    API_URL: string;
+  };
+};
 
-const { publicRuntimeConfig: config } = getConfig() as ConfigVars;
+const { publicRuntimeConfig: config } = getConfig() as NextConfig;
 
 export default config;

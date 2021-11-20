@@ -1,4 +1,5 @@
 import { observer } from 'mobx-react';
+
 import type { AccessToken } from '../lib/utils/useAccessToken';
 
 type Props = {

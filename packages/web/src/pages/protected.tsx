@@ -2,7 +2,7 @@ import withApollo from '../lib/utils/withApollo';
 import { useUserInfoQuery } from '../__generated__/graphql';
 
 const ProtectedPage = () => {
-  const { loading, error, data, refetch } = useUserInfoQuery({ ssr: false });
+  const { loading, error, data, refetch } = useUserInfoQuery();
 
   return !loading ? (
     !error && data ? (

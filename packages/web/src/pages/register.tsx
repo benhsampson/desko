@@ -35,8 +35,11 @@ function RegisterPage() {
 
     setGenericErrors([]);
 
-    if (data?.register.accessToken) {
-      await authenticate(data.register.accessToken);
+    if (data?.register.accessToken && data.register.accessTokenExpiry) {
+      await authenticate(
+        data.register.accessToken,
+        new Date(data.register.accessTokenExpiry as string)
+      );
     }
   };
 
