@@ -11,10 +11,16 @@ import {
   getUserIdFromContextOrFail,
   getUserIdFromContext,
 } from '../services/user.service';
-import { loginSchema, registerSchema } from '../validators/user.validator';
+import {
+  changePasswordSchema,
+  loginSchema,
+  registerSchema,
+} from '../validators/user.validator';
 import { validateInput } from '../utils/validateInput';
 import {
   AuthOut,
+  ChangePasswordIn,
+  ChangePasswordOut,
   LoginIn,
   RefreshTokenIn,
   RegisterIn,
@@ -83,6 +89,26 @@ export class UserResolver {
     const { accessToken, accessTokenExpiry } = await authenticate(ctx, userId);
 
     return { accessToken, accessTokenExpiry };
+  }
+
+  @Mutation(() => ChangePasswordOut)
+  @Authorized()
+  async changePassword(
+    @Arg('input') input: ChangePasswordIn,
+    @Ctx() ctx: Context
+  ): Promise<ChangePasswordOut> {
+    const { errors } = await validateInput(changePasswordSchema, input);
+
+    if (errors) {
+      return { errors };
+    }
+
+    const userId = getUserIdFromContextOrFail(ctx);
+
+    const hashedPassword = await argon2.hash(input.newPassword);
+    await this.userRepository.updatePasswordAndSave(userId, hashedPassword);
+
+    return {};
   }
 
   @Query(() => Boolean)

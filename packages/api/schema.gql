@@ -9,6 +9,15 @@ type AuthOut {
   errors: [UserError!]
 }
 
+input ChangePasswordIn {
+  newPassword: String!
+  newPasswordConfirm: String!
+}
+
+type ChangePasswordOut {
+  errors: [UserError!]
+}
+
 """
 The javascript `Date` as string. Type represents date and time as the ISO Date string.
 """
@@ -20,6 +29,7 @@ input LoginIn {
 }
 
 type Mutation {
+  changePassword(input: ChangePasswordIn!): ChangePasswordOut!
   login(input: LoginIn!): AuthOut!
   logout: Boolean!
   refreshToken(input: RefreshTokenIn!): AuthOut!

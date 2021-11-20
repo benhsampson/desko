@@ -28,6 +28,15 @@ export class RefreshTokenIn {
   refreshToken!: string;
 }
 
+@InputType()
+export class ChangePasswordIn {
+  @Field()
+  newPassword!: string;
+
+  @Field()
+  newPasswordConfirm!: string;
+}
+
 @ObjectType()
 export class AuthOut {
   @Field(() => [UserError], { nullable: true })
@@ -38,4 +47,10 @@ export class AuthOut {
 
   @Field(() => Date, { nullable: true })
   accessTokenExpiry?: Date;
+}
+
+@ObjectType()
+export class ChangePasswordOut {
+  @Field(() => [UserError], { nullable: true })
+  errors?: UserError[];
 }
