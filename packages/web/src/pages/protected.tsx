@@ -5,7 +5,9 @@ import { useAccessToken } from '../lib/utils/useAccessToken';
 import withAuth from '../lib/utils/withAuth';
 
 const ProtectedPage = () => {
-  const { loading, error, data, refetch } = useUserInfoQuery();
+  const { loading, error, data, refetch } = useUserInfoQuery({
+    fetchPolicy: 'no-cache',
+  });
   const accessToken = useAccessToken();
 
   return (
@@ -27,4 +29,4 @@ const ProtectedPage = () => {
   );
 };
 
-export default withApollo(withAuth(ProtectedPage));
+export default withAuth(withApollo(ProtectedPage));

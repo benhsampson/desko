@@ -15,7 +15,7 @@ import nookies from 'nookies';
 
 import config from './config';
 import { useAccessToken } from './useAccessToken';
-import { authenticateWithRefreshToken } from './authenticateWithRefreshToken';
+import { authenticateWithRefreshToken } from './renewAccessToken';
 
 type ApolloState = NormalizedCacheObject;
 

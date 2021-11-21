@@ -15,7 +15,12 @@ function LoginPage() {
     handleSubmit,
     setError,
     formState: { errors },
-  } = useForm<LoginIn>();
+  } = useForm<LoginIn>({
+    defaultValues: {
+      email: 't001@test.com',
+      password: 'Test1234xyz',
+    },
+  });
   const [genericErrors, setGenericErrors] = useState<string[]>([]);
 
   const onSubmit: SubmitHandler<LoginIn> = async (input) => {

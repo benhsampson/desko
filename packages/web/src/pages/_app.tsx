@@ -10,9 +10,11 @@ function App({ Component, pageProps }: AppProps) {
   return (
     <>
       <AccessTokenView accessToken={accessToken} />
+      <button onClick={() => accessToken.clear()}>clear access token</button>
       <Component {...pageProps} />
       <Link href="/login">login</Link>
       <Link href="/protected">protected</Link>
+      <Link href="/change-password">change password</Link>
     </>
   );
 }
