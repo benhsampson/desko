@@ -1,3 +1,5 @@
+import { Role } from './entities/role.entity';
+
 export const DEFAULT_PORT = '4000';
 export const DEFAULT_DB_PORT = '3306';
 
@@ -11,3 +13,8 @@ export const FORGOT_PASSWORD_REDIS_PREFIX = 'fgt-pwd';
 export const FORGOT_PASSWORD_TOKEN_EXPIRES_IN = '15m';
 
 export const EMAIL_FROM = 'no-reply@desko.io';
+
+export const ROLES: Role[] = [
+  { id: 1, value: 'MANAGER' },
+  { id: 2, value: 'USER' },
+];

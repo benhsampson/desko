@@ -18,6 +18,15 @@ type ChangePasswordOut {
   errors: [UserError!]
 }
 
+input CreateSpaceIn {
+  maxBookingsPerDay: Int!
+  name: String!
+}
+
+type CreateSpaceOut {
+  errors: [UserError!]
+}
+
 """
 The javascript `Date` as string. Type represents date and time as the ISO Date string.
 """
@@ -39,6 +48,7 @@ input LoginIn {
 
 type Mutation {
   changePassword(input: ChangePasswordIn!): ChangePasswordOut!
+  createSpace(input: CreateSpaceIn!): CreateSpaceOut!
   forgotPassword(input: ForgotPasswordIn!): ForgotPasswordOut!
   login(input: LoginIn!): AuthOut!
   logout: Boolean!
@@ -71,6 +81,17 @@ type ResetPasswordOut {
   errors: [UserError!]
 }
 
+type Role {
+  value: String!
+}
+
+type Space {
+  id: String!
+  maxBookingsPerDay: Int!
+  name: String!
+  user: User!
+}
+
 type StatusResponse {
   alive: Boolean!
 }
@@ -80,6 +101,8 @@ type User {
   fullName: String!
   id: String!
   password: String!
+  roles: [Role!]!
+  spaces: [Space!]!
 }
 
 type UserError {

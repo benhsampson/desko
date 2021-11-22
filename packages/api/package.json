@@ -5,6 +5,10 @@
   "license": "MIT",
   "scripts": {
     "dev": "nodemon --watch . --ext ts,env,json --exec \"ts-node src/index.ts\"",
+    "_typeorm": "ts-node ../../node_modules/typeorm/cli.js",
+    "migrate:create": "yarn _typeorm migration:create -d src/migrations/ -f src/ormconfig.ts -n",
+    "migrate:up": "yarn _typeorm migration:run -f src/ormconfig.ts",
+    "migrate:down": "yarn _typeorm migration:revert -f src/ormconfig.ts",
     "lint": "eslint src/**"
   },
   "dependencies": {

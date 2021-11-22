@@ -7,31 +7,28 @@ import Redis from 'ioredis';
 import { buildSchema } from 'type-graphql';
 import { createConnection } from 'typeorm';
 
-import { DEFAULT_DB_PORT, DEFAULT_PORT } from './constants';
+import { DEFAULT_PORT } from './constants';
 import { StatusResolver } from './resolvers/status.resolver';
 import { UserResolver } from './resolvers/user.resolver';
+import { SpaceResolver } from './resolvers/space.resolver';
 import { User } from './entities/user.entity';
+import { Space } from './entities/space.entity';
+import { Role } from './entities/role.entity';
 import { authChecker } from './utils/authChecker';
 import { Context } from './types/Context';
+import connectionOptions from './ormconfig';
 
 dotenv.config();
 
 const PORT = parseInt(process.env.PORT || DEFAULT_PORT, 10);
-const DB_PORT = parseInt(process.env.DB_PORT || DEFAULT_DB_PORT, 10);
+// const DB_PORT = parseInt(process.env.DB_PORT || DEFAULT_DB_PORT, 10);
 const REDIS_PORT =
   process.env.REDIS_PORT?.length && parseInt(process.env.REDIS_PORT, 10);
 
 (async () => {
   await createConnection({
-    type: 'mysql',
-    port: DB_PORT,
-    host: process.env.DB_HOST,
-    database: process.env.DB_NAME,
-    username: process.env.DB_USERNAME,
-    password: process.env.DB_PASSWORD,
-    // logging: process.env.NODE_ENV !== 'production',
-    synchronize: process.env.NODE_ENV !== 'production',
-    entities: [User],
+    ...connectionOptions,
+    entities: [User, Role, Space],
   });
   const app = express();
   app.use(
@@ -42,7 +39,7 @@ const REDIS_PORT =
   );
   const redis = new Redis(REDIS_PORT, process.env.REDIS_HOST);
   const schema = await buildSchema({
-    resolvers: [StatusResolver, UserResolver],
+    resolvers: [StatusResolver, UserResolver, SpaceResolver],
     emitSchemaFile: true,
     authChecker,
   });
