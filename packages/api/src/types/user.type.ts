@@ -1,4 +1,6 @@
 import { Field, InputType, ObjectType } from 'type-graphql';
+
+import { RoleValue } from '../entities/role.entity';
 import { UserError } from './UserError';
 
 @InputType()
@@ -11,6 +13,9 @@ export class RegisterIn {
 
   @Field()
   password!: string;
+
+  @Field(() => String)
+  role!: RoleValue;
 }
 
 @InputType()

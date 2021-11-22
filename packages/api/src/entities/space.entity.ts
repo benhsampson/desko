@@ -1,5 +1,12 @@
 import { Field, Int, ObjectType } from 'type-graphql';
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinTable,
+  ManyToMany,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { User } from './user.entity';
 
 @Entity()
@@ -17,7 +24,16 @@ export class Space {
   @Field(() => Int)
   maxBookingsPerDay!: number;
 
-  @ManyToOne(() => User, (user) => user.spaces)
+  @Column({ unique: true })
+  @Field()
+  code!: string;
+
+  @ManyToOne(() => User, (user) => user.managedSpaces)
   @Field(() => User)
-  user!: User;
+  manager!: User;
+
+  @ManyToMany(() => User)
+  @JoinTable()
+  @Field(() => [User])
+  users!: User[];
 }

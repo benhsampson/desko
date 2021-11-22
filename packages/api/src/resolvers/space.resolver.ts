@@ -1,13 +1,23 @@
-import { Arg, Authorized, Ctx, Mutation, Resolver } from 'type-graphql';
+import { Arg, Authorized, Ctx, Mutation, Query, Resolver } from 'type-graphql';
 import { getCustomRepository } from 'typeorm';
 
+import { Space } from '../entities/space.entity';
 import { SpaceRepository } from '../repositories/space.repository';
 import { UserRepository } from '../repositories/user.repository';
 import { getUserIdFromContextOrFail } from '../services/user.service';
 import { Context } from '../types/Context';
-import { CreateSpaceIn, CreateSpaceOut } from '../types/space.type';
+import {
+  CreateSpaceIn,
+  CreateSpaceOut,
+  JoinSpaceOut,
+  UpdateSpaceIn,
+  UpdateSpaceOut,
+} from '../types/space.type';
 import { validateInput } from '../utils/validateInput';
-import { createSpaceSchema } from '../validators/space.validator';
+import {
+  createSpaceSchema,
+  updateSpaceSchema,
+} from '../validators/space.validator';
 
 @Resolver()
 export class SpaceResolver {
@@ -34,5 +44,70 @@ export class SpaceResolver {
     );
 
     return {};
+  }
+
+  @Mutation(() => UpdateSpaceOut)
+  @Authorized('MANAGER')
+  async updateSpace(
+    @Arg('spaceId') spaceId: string,
+    @Arg('input') input: UpdateSpaceIn,
+    @Ctx() ctx: Context
+  ): Promise<UpdateSpaceOut> {
+    const { errors } = await validateInput(updateSpaceSchema, input);
+
+    if (errors) return { errors };
+
+    const userId = getUserIdFromContextOrFail(ctx);
+    const space = await this.spaceRepository.findOneOrFail(spaceId, {
+      where: { id: spaceId, manager: { id: userId } },
+    });
+
+    await this.spaceRepository.updateAndSaveSpace(space, input);
+
+    return {};
+  }
+
+  @Query(() => [Space])
+  @Authorized('MANAGER')
+  async managerSpaces(@Ctx() ctx: Context): Promise<Space[]> {
+    const userId = getUserIdFromContextOrFail(ctx);
+    const user = await this.userRepository.findOneOrFail(userId);
+
+    return this.spaceRepository.getManagerSpaces(user);
+  }
+
+  @Mutation(() => JoinSpaceOut)
+  @Authorized('USER')
+  async joinSpace(@Arg('code') code: string, @Ctx() ctx: Context) {
+    const userId = getUserIdFromContextOrFail(ctx);
+    const user = await this.userRepository.findOneOrFail(userId);
+
+    const space = await this.spaceRepository.findOne(
+      { code },
+      { relations: ['users'] }
+    );
+
+    if (!space) {
+      return {
+        errors: [
+          {
+            message: 'Invalid link, request a new one from your space manager',
+          },
+        ],
+      };
+    }
+
+    await this.spaceRepository.joinSpace(user, space);
+
+    return {};
+  }
+
+  @Query(() => [Space])
+  @Authorized('USER')
+  async joinedSpaces(@Ctx() ctx: Context): Promise<Space[]> {
+    const userId = getUserIdFromContextOrFail(ctx);
+    const user = await this.userRepository.findOneOrFail(userId);
+
+    return this.spaceRepository.getJoinedSpaces(user);
   }
 }

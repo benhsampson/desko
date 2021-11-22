@@ -10,8 +10,29 @@ export class CreateSpaceIn {
   maxBookingsPerDay!: number;
 }
 
+@InputType()
+export class UpdateSpaceIn {
+  @Field({ nullable: true })
+  name?: string;
+
+  @Field(() => Int, { nullable: true })
+  maxBookingsPerDay?: number;
+}
+
 @ObjectType()
 export class CreateSpaceOut {
+  @Field(() => [UserError], { nullable: true })
+  errors?: UserError[];
+}
+
+@ObjectType()
+export class JoinSpaceOut {
+  @Field(() => [UserError], { nullable: true })
+  errors?: UserError[];
+}
+
+@ObjectType()
+export class UpdateSpaceOut {
   @Field(() => [UserError], { nullable: true })
   errors?: UserError[];
 }

@@ -39,6 +39,7 @@ import {
 } from '../constants';
 import ms from 'ms';
 import { sendEmail } from '../utils/sendEmail';
+import { TypeOf } from 'yup';
 
 @Resolver()
 export class UserResolver {
@@ -49,7 +50,10 @@ export class UserResolver {
     @Arg('input') input: RegisterIn,
     @Ctx() ctx: Context
   ): Promise<AuthOut> {
-    const { errors } = await validateInput(registerSchema, input);
+    const { errors } = await validateInput<
+      RegisterIn,
+      TypeOf<typeof registerSchema>
+    >(registerSchema, input);
 
     if (errors) {
       return { errors };
@@ -59,7 +63,8 @@ export class UserResolver {
     const user = await this.userRepository.createAndSave(
       input.fullName,
       input.email,
-      hashedPassword
+      hashedPassword,
+      input.role
     );
 
     const { accessToken, accessTokenExpiry } = await authenticate(ctx, user.id);

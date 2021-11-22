@@ -15,6 +15,6 @@ export const FORGOT_PASSWORD_TOKEN_EXPIRES_IN = '15m';
 export const EMAIL_FROM = 'no-reply@desko.io';
 
 export const ROLES: Role[] = [
-  { id: 1, value: 'MANAGER' },
-  { id: 2, value: 'USER' },
+  { id: 1, value: 'MANAGER', users: [] },
+  { id: 2, value: 'USER', users: [] },
 ];

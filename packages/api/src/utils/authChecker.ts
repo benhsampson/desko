@@ -8,17 +8,18 @@ import { Context } from '../types/Context';
 
 export const authChecker: AuthChecker<Context> = async ({ context }, roles) => {
   const userId = getUserIdFromContext(context);
-
-  if (userId) {
-    const user = await getCustomRepository(UserRepository).findOne(userId, {
+  const user =
+    userId &&
+    (await getCustomRepository(UserRepository).findOne(userId, {
       relations: ['roles'],
-    });
-    return (
-      !!user &&
-      (roles.length === 0 ||
-        user.roles.some((role) => roles.includes(role.value)))
-    );
-  } else {
-    throw new AuthenticationError('Unauthorized');
-  }
+    }));
+  const authorized =
+    !!user &&
+    (roles.length === 0 ||
+      (await user.roles).some((role) => roles.includes(role.value)));
+
+  if (!authorized)
+    throw new AuthenticationError('Unauthorized/unauthenticated');
+
+  return authorized;
 };

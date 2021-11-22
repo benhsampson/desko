@@ -1,10 +1,16 @@
 import { EntityRepository, Repository } from 'typeorm';
-import { Role } from '../entities/role.entity';
+
+import { Role, RoleValue } from '../entities/role.entity';
 import { User } from '../entities/user.entity';
 
 @EntityRepository(User)
 export class UserRepository extends Repository<User> {
-  async createAndSave(fullName: string, email: string, hashedPassword: string) {
+  async createAndSave(
+    fullName: string,
+    email: string,
+    hashedPassword: string,
+    roleValue: RoleValue
+  ) {
     const user = new User();
 
     user.fullName = fullName;
@@ -12,8 +18,9 @@ export class UserRepository extends Repository<User> {
     user.password = hashedPassword;
 
     const role = await this.manager.findOneOrFail(Role, {
-      where: { value: 'MANAGER' },
+      where: { value: roleValue },
     });
+
     user.roles = [role];
 
     return this.manager.save(user);

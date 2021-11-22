@@ -1,10 +1,5 @@
 import * as yup from 'yup';
-import {
-  ChangePasswordIn,
-  LoginIn,
-  RegisterIn,
-  ResetPasswordIn,
-} from '../types/user.type';
+import { ChangePasswordIn, LoginIn, ResetPasswordIn } from '../types/user.type';
 
 const passwordSchema = yup
   .string()
@@ -14,29 +9,34 @@ const passwordSchema = yup
     'Password must contain at least 1 uppercase letter, 1 lowercase letter, and 1 number'
   );
 
-export const registerSchema: yup.SchemaOf<RegisterIn> = yup.object().shape({
-  fullName: yup.string().required(),
-  email: yup.string().email('Invalid email').required(),
-  password: passwordSchema.required(),
-});
+export const registerSchema = yup
+  .object({
+    fullName: yup.string().defined(),
+    email: yup.string().email('Invalid email').defined(),
+    password: passwordSchema.defined(),
+    role: yup.string().defined(),
+  })
+  .defined();
 
-export const loginSchema: yup.SchemaOf<LoginIn> = yup.object().shape({
-  email: yup.string().required(),
-  password: yup.string().required(),
-});
+export const loginSchema: yup.SchemaOf<LoginIn> = yup
+  .object({
+    email: yup.string().defined(),
+    password: yup.string().defined(),
+  })
+  .defined();
 
 export const changePasswordSchema: yup.SchemaOf<ChangePasswordIn> = yup
-  .object()
-  .shape({
-    newPassword: passwordSchema.required(),
+  .object({
+    newPassword: passwordSchema.defined(),
     newPasswordConfirm: yup
       .string()
       .oneOf([yup.ref('newPassword'), null], 'Passwords must match')
-      .required(),
-  });
+      .defined(),
+  })
+  .defined();
 
 export const resetPasswordSchema: yup.SchemaOf<ResetPasswordIn> = yup
-  .object()
-  .shape({
-    password: passwordSchema.required(),
-  });
+  .object({
+    password: passwordSchema.defined(),
+  })
+  .defined();

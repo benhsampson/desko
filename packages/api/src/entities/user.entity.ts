@@ -29,12 +29,11 @@ export class User {
   @Field()
   password!: string;
 
-  @ManyToMany(() => Role)
+  @ManyToMany(() => Role, (role) => role.users)
   @JoinTable()
   @Field(() => [Role])
   roles!: Role[];
 
-  @OneToMany(() => Space, (space) => space.user)
-  @Field(() => [Space])
-  spaces!: Space[];
+  @OneToMany(() => Space, (space) => space.manager)
+  managedSpaces!: Space[];
 }

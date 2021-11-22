@@ -11,9 +11,6 @@ import { DEFAULT_PORT } from './constants';
 import { StatusResolver } from './resolvers/status.resolver';
 import { UserResolver } from './resolvers/user.resolver';
 import { SpaceResolver } from './resolvers/space.resolver';
-import { User } from './entities/user.entity';
-import { Space } from './entities/space.entity';
-import { Role } from './entities/role.entity';
 import { authChecker } from './utils/authChecker';
 import { Context } from './types/Context';
 import connectionOptions from './ormconfig';
@@ -21,15 +18,11 @@ import connectionOptions from './ormconfig';
 dotenv.config();
 
 const PORT = parseInt(process.env.PORT || DEFAULT_PORT, 10);
-// const DB_PORT = parseInt(process.env.DB_PORT || DEFAULT_DB_PORT, 10);
 const REDIS_PORT =
   process.env.REDIS_PORT?.length && parseInt(process.env.REDIS_PORT, 10);
 
 (async () => {
-  await createConnection({
-    ...connectionOptions,
-    entities: [User, Role, Space],
-  });
+  await createConnection(connectionOptions);
   const app = express();
   app.use(
     cors({

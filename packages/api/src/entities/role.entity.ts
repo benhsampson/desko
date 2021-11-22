@@ -1,7 +1,8 @@
 import { Field, ObjectType } from 'type-graphql';
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { User } from './user.entity';
 
-type RoleValue = 'USER' | 'MANAGER';
+export type RoleValue = 'USER' | 'MANAGER';
 
 @Entity()
 @ObjectType()
@@ -12,4 +13,7 @@ export class Role {
   @Column({ unique: true })
   @Field(() => String)
   value!: RoleValue;
+
+  @ManyToMany(() => User, (user) => user.roles)
+  users!: User[];
 }

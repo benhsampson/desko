@@ -18,7 +18,7 @@ export class Init1637537512558 implements MigrationInterface {
       .createQueryBuilder()
       .delete()
       .from(Role)
-      .where('id IN (:ids)', { ids: ROLES.map(({ id }) => id) })
+      .where('id IN (:...ids)', { ids: ROLES.map(({ id }) => id) })
       .execute();
   }
 }
