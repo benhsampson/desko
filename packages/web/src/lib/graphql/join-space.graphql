@@ -1,0 +1,11 @@
+mutation JoinSpace($code: String!) {
+  joinSpace(code: $code) {
+    errors {
+      path
+      message
+    }
+    space {
+      id
+    }
+  }
+}

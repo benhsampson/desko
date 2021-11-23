@@ -5,8 +5,11 @@ import {
   JoinTable,
   ManyToMany,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+
+import { Booking } from './booking.entity';
 import { User } from './user.entity';
 
 @Entity()
@@ -36,4 +39,8 @@ export class Space {
   @JoinTable()
   @Field(() => [User])
   users!: User[];
+
+  @OneToMany(() => Booking, (booking) => booking.space)
+  @Field(() => [Booking])
+  bookings!: Booking[];
 }

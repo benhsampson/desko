@@ -27,16 +27,6 @@ type WithApolloParams = {
 
 type WithApolloContext = NextPageContext & WithApolloParams;
 
-type WithApolloPageProps = {
-  query: qs.ParsedQs;
-};
-
-type WithApolloComponent = NextComponentType<
-  WithApolloContext,
-  object,
-  WithApolloParams
->;
-
 const SSR_MODE = typeof window === 'undefined';
 
 const httpLink = createHttpLink({
@@ -146,17 +136,17 @@ function initApolloInCtx(ctx: WithApolloContext) {
   return ctx;
 }
 
-function withApollo(Page: NextPage<WithApolloPageProps>) {
-  const WithApollo: WithApolloComponent = ({
-    apolloClient,
-    apolloState,
-    ...rest
-  }) => {
-    const client = apolloClient ?? initApollo(apolloState);
+function withApollo<P, IP>(Page: NextPage<P, IP>) {
+  const WithApollo: NextComponentType<
+    WithApolloContext,
+    object,
+    P & WithApolloParams
+  > = (props) => {
+    const client = props.apolloClient ?? initApollo(props.apolloState);
 
     return (
       <ApolloProvider client={client}>
-        <Page {...rest} />
+        <Page {...props} />
       </ApolloProvider>
     );
   };

@@ -1,0 +1,7 @@
+query JoinedSpaces {
+  joinedSpaces {
+    id
+    name
+    maxBookingsPerDay
+  }
+}

@@ -2,6 +2,7 @@ import dotenv from 'dotenv';
 import { ConnectionOptions } from 'typeorm';
 
 import { DEFAULT_DB_PORT } from './constants';
+import { Booking } from './entities/booking.entity';
 import { Role } from './entities/role.entity';
 import { Space } from './entities/space.entity';
 import { User } from './entities/user.entity';
@@ -17,7 +18,7 @@ const connectionOptions: ConnectionOptions = {
   password: process.env.DB_PASSWORD,
   logging: process.env.DB_LOGGING === 'true',
   synchronize: process.env.DB_SYNCHRONIZE === 'true',
-  entities: [User, Role, Space],
+  entities: [User, Role, Space, Booking],
   migrations: [`src/migrations/**/*.ts`],
 };
 

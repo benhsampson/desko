@@ -5,17 +5,23 @@ import Link from 'next/link';
 import withApollo from '../lib/utils/withApollo';
 import { RegisterIn, useRegisterMutation } from '../__generated__/graphql';
 import { useAuthenticate } from '../lib/utils/useAuthenticate';
+import Navbar from '../components/Navbar';
+import { useQueryVar } from '../lib/utils/useQueryVar';
 
 function RegisterPage() {
   const [registerUser] = useRegisterMutation();
   const authenticate = useAuthenticate();
+
+  const code = useQueryVar('code');
 
   const {
     register,
     handleSubmit,
     setError,
     formState: { errors },
-  } = useForm<RegisterIn>();
+  } = useForm<RegisterIn>({
+    defaultValues: { role: code ? 'USER' : 'MANAGER' },
+  });
   const [genericErrors, setGenericErrors] = useState<string[]>([]);
 
   const onSubmit: SubmitHandler<RegisterIn> = async (input) => {
@@ -38,29 +44,36 @@ function RegisterPage() {
     if (data?.register.accessToken && data.register.accessTokenExpiry) {
       await authenticate(
         data.register.accessToken,
-        new Date(data.register.accessTokenExpiry as string)
+        new Date(data.register.accessTokenExpiry as string),
+        code && `/invite/${code}`
       );
     }
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      {genericErrors.length ? (
-        <ul>
-          {genericErrors.map((e, i) => (
-            <li key={i}>{e}</li>
-          ))}
-        </ul>
-      ) : null}
-      <input {...register('fullName')} />
-      {errors.fullName?.message}
-      <input {...register('email')} />
-      {errors.email?.message}
-      <input {...register('password')} />
-      {errors.password?.message}
-      <button type="submit">create account</button>
-      <Link href="/login">login</Link>
-    </form>
+    <div>
+      <h1>register</h1>
+      {code && <h2>register to proceed to space</h2>}
+      <form onSubmit={handleSubmit(onSubmit)}>
+        {genericErrors.length ? (
+          <ul>
+            {genericErrors.map((e, i) => (
+              <li key={i}>{e}</li>
+            ))}
+          </ul>
+        ) : null}
+        <input {...register('fullName')} placeholder="full name" />
+        {errors.fullName?.message}
+        <input {...register('email')} placeholder="email" />
+        {errors.email?.message}
+        <input {...register('password')} placeholder="password" />
+        {errors.password?.message}
+        <button type="submit">create account</button>
+        <Link href={{ pathname: '/login', ...(code && { query: { code } }) }}>
+          login
+        </Link>
+      </form>
+    </div>
   );
 }
 

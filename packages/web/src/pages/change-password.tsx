@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
+import Navbar from '../components/Navbar';
 import { partition } from '../lib/utils/partition';
 import withApollo from '../lib/utils/withApollo';
 import {
@@ -40,7 +41,7 @@ function ChangePasswordPage() {
   };
 
   return (
-    <div>
+    <Navbar>
       <form onSubmit={handleSubmit(onSubmit)}>
         {genericErrors.length ? (
           <ul>
@@ -49,13 +50,16 @@ function ChangePasswordPage() {
             ))}
           </ul>
         ) : null}
-        <input {...register('newPassword')} />
+        <input {...register('newPassword')} placeholder="new password" />
         {errors.newPassword?.message}
-        <input {...register('newPasswordConfirm')} />
+        <input
+          {...register('newPasswordConfirm')}
+          placeholder="confirm new password"
+        />
         {errors.newPasswordConfirm?.message}
         <button type="submit">change password</button>
       </form>
-    </div>
+    </Navbar>
   );
 }
 

@@ -1,5 +1,17 @@
-mutation Register($fullName: String!, $email: String!, $password: String!) {
-  register(input: { fullName: $fullName, email: $email, password: $password }) {
+mutation Register(
+  $fullName: String!
+  $email: String!
+  $password: String!
+  $role: String!
+) {
+  register(
+    input: {
+      fullName: $fullName
+      email: $email
+      password: $password
+      role: $role
+    }
+  ) {
     errors {
       message
       path

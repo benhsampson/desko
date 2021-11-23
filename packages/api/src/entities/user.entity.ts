@@ -7,6 +7,7 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { Booking } from './booking.entity';
 import { Role } from './role.entity';
 import { Space } from './space.entity';
 
@@ -36,4 +37,7 @@ export class User {
 
   @OneToMany(() => Space, (space) => space.manager)
   managedSpaces!: Space[];
+
+  @OneToMany(() => Booking, (booking) => booking.user)
+  bookings!: Booking[];
 }

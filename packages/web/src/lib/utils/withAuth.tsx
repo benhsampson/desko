@@ -9,7 +9,7 @@ import { useAccessToken } from './useAccessToken';
 const IS_SERVER = typeof window === 'undefined';
 
 function withAuth<P, IP>(Page: NextPage<P, IP>) {
-  const WithAuth: NextComponentType<NextPageContext, IP, P> = observer(
+  const WithAuth: NextComponentType<NextPageContext, object, P> = observer(
     (props) => {
       const router = useRouter();
       const accessToken = useAccessToken();
@@ -31,6 +31,16 @@ function withAuth<P, IP>(Page: NextPage<P, IP>) {
       return <Page {...props} />;
     }
   );
+
+  WithAuth.getInitialProps = async (ctx) => {
+    let pageProps = {};
+
+    if (Page.getInitialProps) {
+      pageProps = await Page.getInitialProps(ctx);
+    }
+
+    return pageProps;
+  };
 
   return WithAuth;
 }

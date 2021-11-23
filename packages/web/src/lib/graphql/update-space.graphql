@@ -1,0 +1,19 @@
+mutation UpdateSpace(
+  $spaceId: String!
+  $name: String
+  $maxBookingsPerDay: Int
+) {
+  updateSpace(
+    spaceId: $spaceId
+    input: { name: $name, maxBookingsPerDay: $maxBookingsPerDay }
+  ) {
+    space {
+      name
+      maxBookingsPerDay
+    }
+    errors {
+      path
+      message
+    }
+  }
+}

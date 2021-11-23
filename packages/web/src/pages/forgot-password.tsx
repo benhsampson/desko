@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
+import Navbar from '../components/Navbar';
 import { partition } from '../lib/utils/partition';
 import withApollo from '../lib/utils/withApollo';
 import {
@@ -40,7 +41,7 @@ function ForgotPasswordPage() {
   };
 
   return (
-    <div>
+    <Navbar>
       <form onSubmit={handleSubmit(onSubmit)}>
         {genericErrors.length ? (
           <ul>
@@ -49,11 +50,11 @@ function ForgotPasswordPage() {
             ))}
           </ul>
         ) : null}
-        <input {...register('email')} />
+        <input {...register('email')} placeholder="email" />
         {errors.email?.message}
         <button type="submit">send reset email</button>
       </form>
-    </div>
+    </Navbar>
   );
 }
 

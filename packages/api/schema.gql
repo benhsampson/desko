@@ -9,6 +9,24 @@ type AuthOut {
   errors: [UserError!]
 }
 
+input BookIn {
+  day: Int!
+  month: Int!
+  year: Int!
+}
+
+type Booking {
+  date: DateTime!
+  id: String!
+}
+
+type BookingSlot {
+  available: Boolean
+  bookings: [Booking!]!
+  date: DateTime!
+  space: Space!
+}
+
 input ChangePasswordIn {
   newPassword: String!
   newPasswordConfirm: String!
@@ -43,6 +61,7 @@ type ForgotPasswordOut {
 
 type JoinSpaceOut {
   errors: [UserError!]
+  space: Space
 }
 
 input LoginIn {
@@ -51,6 +70,7 @@ input LoginIn {
 }
 
 type Mutation {
+  book(input: BookIn!, spaceId: String!): Booking!
   changePassword(input: ChangePasswordIn!): ChangePasswordOut!
   createSpace(input: CreateSpaceIn!): CreateSpaceOut!
   forgotPassword(input: ForgotPasswordIn!): ForgotPasswordOut!
@@ -64,10 +84,12 @@ type Mutation {
 }
 
 type Query {
+  getBookings(spaceId: String!): [BookingSlot!]!
   getStatus: StatusResponse!
   isAuthenticated: Boolean!
   joinedSpaces: [Space!]!
   managerSpaces: [Space!]!
+  spaceInfo(spaceId: String!): Space!
   userInfo: User!
 }
 
@@ -95,6 +117,7 @@ type Role {
 }
 
 type Space {
+  bookings: [Booking!]!
   code: String!
   id: String!
   manager: User!
@@ -114,6 +137,7 @@ input UpdateSpaceIn {
 
 type UpdateSpaceOut {
   errors: [UserError!]
+  space: Space
 }
 
 type User {

@@ -64,7 +64,9 @@ export class SpaceResolver {
 
     await this.spaceRepository.updateAndSaveSpace(space, input);
 
-    return {};
+    return {
+      space,
+    };
   }
 
   @Query(() => [Space])
@@ -76,16 +78,28 @@ export class SpaceResolver {
     return this.spaceRepository.getManagerSpaces(user);
   }
 
+  @Query(() => Space)
+  @Authorized()
+  async spaceInfo(@Arg('spaceId') spaceId: string): Promise<Space> {
+    return this.spaceRepository.findOneOrFail(spaceId);
+  }
+
   @Mutation(() => JoinSpaceOut)
-  @Authorized('USER')
+  @Authorized()
   async joinSpace(@Arg('code') code: string, @Ctx() ctx: Context) {
     const userId = getUserIdFromContextOrFail(ctx);
-    const user = await this.userRepository.findOneOrFail(userId);
+    const user = await this.userRepository.findOneOrFail(userId, {
+      relations: ['roles'],
+    });
 
     const space = await this.spaceRepository.findOne(
       { code },
       { relations: ['users'] }
     );
+
+    if (user.roles.map((r) => r.value).includes('MANAGER')) {
+      return { space };
+    }
 
     if (!space) {
       return {
@@ -99,7 +113,9 @@ export class SpaceResolver {
 
     await this.spaceRepository.joinSpace(user, space);
 
-    return {};
+    return {
+      space,
+    };
   }
 
   @Query(() => [Space])

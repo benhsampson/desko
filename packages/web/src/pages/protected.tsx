@@ -29,4 +29,4 @@ const ProtectedPage = () => {
   );
 };
 
-export default withAuth(withApollo(ProtectedPage));
+export default withApollo(withAuth(ProtectedPage));

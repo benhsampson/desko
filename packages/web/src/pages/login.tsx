@@ -5,10 +5,14 @@ import Link from 'next/link';
 import withApollo from '../lib/utils/withApollo';
 import { LoginIn, useLoginMutation } from '../__generated__/graphql';
 import { useAuthenticate } from '../lib/utils/useAuthenticate';
+import Navbar from '../components/Navbar';
+import { useQueryVar } from '../lib/utils/useQueryVar';
 
 function LoginPage() {
   const [login] = useLoginMutation();
   const authenticate = useAuthenticate();
+
+  const code = useQueryVar('code');
 
   const {
     register,
@@ -16,10 +20,10 @@ function LoginPage() {
     setError,
     formState: { errors },
   } = useForm<LoginIn>({
-    defaultValues: {
-      email: 't001@test.com',
-      password: 'Test1234xyz',
-    },
+    // defaultValues: {
+    //   email: 't001@test.com',
+    //   password: 'Test1234',
+    // },
   });
   const [genericErrors, setGenericErrors] = useState<string[]>([]);
 
@@ -43,13 +47,16 @@ function LoginPage() {
     if (data?.login.accessToken && data.login.accessTokenExpiry) {
       await authenticate(
         data.login.accessToken,
-        new Date(data.login.accessTokenExpiry as string)
+        new Date(data.login.accessTokenExpiry as string),
+        code && `/invite/${code}`
       );
     }
   };
 
   return (
     <div>
+      <h1>login</h1>
+      {code && <h2>login to proceed to space</h2>}
       <form onSubmit={handleSubmit(onSubmit)}>
         {genericErrors.length ? (
           <ul>
@@ -58,12 +65,16 @@ function LoginPage() {
             ))}
           </ul>
         ) : null}
-        <input {...register('email')} />
+        <input {...register('email')} placeholder="email" />
         {errors.email?.message}
-        <input {...register('password')} />
+        <input {...register('password')} placeholder="password" />
         {errors.password?.message}
         <button type="submit">login</button>
-        <Link href="/register">register</Link>
+        <Link
+          href={{ pathname: '/register', ...(code && { query: { code } }) }}
+        >
+          register
+        </Link>
         <Link href="/forgot-password">forgot password</Link>
       </form>
     </div>

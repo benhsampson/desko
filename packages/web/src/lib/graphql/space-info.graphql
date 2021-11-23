@@ -1,0 +1,8 @@
+query SpaceInfo($spaceId: String!) {
+  spaceInfo(spaceId: $spaceId) {
+    id
+    name
+    maxBookingsPerDay
+    code
+  }
+}

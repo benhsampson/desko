@@ -14,6 +14,7 @@ import { SpaceResolver } from './resolvers/space.resolver';
 import { authChecker } from './utils/authChecker';
 import { Context } from './types/Context';
 import connectionOptions from './ormconfig';
+import { BookingSlotResolver } from './resolvers/bookingSlot.resolver';
 
 dotenv.config();
 
@@ -32,7 +33,12 @@ const REDIS_PORT =
   );
   const redis = new Redis(REDIS_PORT, process.env.REDIS_HOST);
   const schema = await buildSchema({
-    resolvers: [StatusResolver, UserResolver, SpaceResolver],
+    resolvers: [
+      StatusResolver,
+      UserResolver,
+      SpaceResolver,
+      BookingSlotResolver,
+    ],
     emitSchemaFile: true,
     authChecker,
   });

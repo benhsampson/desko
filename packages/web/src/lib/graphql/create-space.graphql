@@ -1,0 +1,8 @@
+mutation CreateSpace($name: String!, $maxBookingsPerDay: Int!) {
+  createSpace(input: { name: $name, maxBookingsPerDay: $maxBookingsPerDay }) {
+    errors {
+      path
+      message
+    }
+  }
+}

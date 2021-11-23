@@ -1,0 +1,8 @@
+query ManagerSpaces {
+  managerSpaces {
+    id
+    name
+    maxBookingsPerDay
+    code
+  }
+}

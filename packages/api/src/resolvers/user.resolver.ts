@@ -140,7 +140,7 @@ export class UserResolver {
   async userInfo(@Ctx() ctx: Context): Promise<User> {
     const userId = getUserIdFromContextOrFail(ctx);
 
-    return this.userRepository.findOneOrFail(userId);
+    return this.userRepository.findOneOrFail(userId, { relations: ['roles'] });
   }
 
   @Mutation(() => Boolean)

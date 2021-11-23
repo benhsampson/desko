@@ -3,5 +3,8 @@ query UserInfo {
     id
     fullName
     email
+    roles {
+      value
+    }
   }
 }

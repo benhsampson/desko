@@ -1,4 +1,5 @@
 import { Field, InputType, Int, ObjectType } from 'type-graphql';
+import { Space } from '../entities/space.entity';
 import { UserError } from './UserError';
 
 @InputType()
@@ -29,10 +30,16 @@ export class CreateSpaceOut {
 export class JoinSpaceOut {
   @Field(() => [UserError], { nullable: true })
   errors?: UserError[];
+
+  @Field(() => Space, { nullable: true })
+  space?: Space;
 }
 
 @ObjectType()
 export class UpdateSpaceOut {
   @Field(() => [UserError], { nullable: true })
   errors?: UserError[];
+
+  @Field(() => Space, { nullable: true })
+  space?: Space;
 }
