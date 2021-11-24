@@ -1,16 +1,19 @@
 import { useEffect, useState } from 'react';
-
+import Link from 'next/link';
 import { SubmitHandler, useForm } from 'react-hook-form';
+
 import Navbar from '../../../components/Navbar';
-import { partition } from '../../../lib/utils/partition';
 import { useQueryVar } from '../../../lib/utils/useQueryVar';
 import withApollo from '../../../lib/utils/withApollo';
 import withAuth from '../../../lib/utils/withAuth';
 import {
   UpdateSpaceIn,
+  UserError,
   useSpaceInfoQuery,
   useUpdateSpaceMutation,
 } from '../../../__generated__/graphql';
+import { partitionErrors } from '../../../lib/utils/partitionErrors';
+import ErrorList from '../../../components/ErrorList';
 
 const SpaceEditPage = () => {
   // TODO: Check if null in getInitialProps()
@@ -38,7 +41,7 @@ const SpaceEditPage = () => {
     reset(spaceInfo.data?.spaceInfo);
   }, [reset, spaceInfo.data?.spaceInfo]);
 
-  const [genericErrors, setGenericErrors] = useState<string[]>([]);
+  const [genericErrors, setGenericErrors] = useState<UserError[]>([]);
 
   const onSubmit: SubmitHandler<UpdateSpaceIn> = async (input) => {
     const dirtyInput = [...(Object.keys(input) as (keyof UpdateSpaceIn)[])]
@@ -59,17 +62,18 @@ const SpaceEditPage = () => {
       variables: { spaceId, ...dirtyInput },
     });
 
-    if (errors) return setGenericErrors(errors.map((e) => e.message));
+    if (errors) return console.error(errors);
 
     if (data?.updateSpace.errors) {
-      const [pathErrors, nonPathErrors] = partition(
-        data?.updateSpace.errors || [],
-        (e) => !!e.path
+      partitionErrors(
+        data.updateSpace.errors,
+        (err) =>
+          setError(err.path as keyof UpdateSpaceIn, {
+            type: 'server',
+            message: err.message,
+          }),
+        (errs) => setGenericErrors(errs)
       );
-      pathErrors.forEach(({ path, message }) =>
-        setError(path as keyof UpdateSpaceIn, { type: 'server', message })
-      );
-      return setGenericErrors(nonPathErrors.map((e) => e.message));
     }
 
     setGenericErrors([]);
@@ -82,15 +86,18 @@ const SpaceEditPage = () => {
 
   return (
     <Navbar>
-      <h1>edit {spaceInfo.data?.spaceInfo.name}</h1>
+      {!spaceInfo.loading && spaceInfo.data ? (
+        <h1>
+          edit{' '}
+          <Link href={`/space/${spaceInfo.data?.spaceInfo.id}`}>
+            {spaceInfo.data?.spaceInfo.name}
+          </Link>
+        </h1>
+      ) : (
+        <p>loading...</p>
+      )}
       <form onSubmit={handleSubmit(onSubmit)}>
-        {genericErrors.length ? (
-          <ul>
-            {genericErrors.map((e, i) => (
-              <li key={i}>{e}</li>
-            ))}
-          </ul>
-        ) : null}
+        <ErrorList errors={genericErrors} />
         <input {...register('name')} placeholder="name" />
         {errors.name?.message}
         <input

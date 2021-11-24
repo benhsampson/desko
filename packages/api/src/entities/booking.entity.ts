@@ -1,5 +1,11 @@
 import { Field, ObjectType } from 'type-graphql';
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  DeleteDateColumn,
+  Entity,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 import { Space } from './space.entity';
 import { User } from './user.entity';
@@ -15,9 +21,13 @@ export class Booking {
   @Field(() => Date)
   date!: Date;
 
+  @DeleteDateColumn()
+  deletedAt?: Date;
+
   @ManyToOne(() => Space, (space) => space.bookings)
   space!: Space;
 
   @ManyToOne(() => User, (user) => user.bookings)
+  @Field(() => User)
   user!: User;
 }

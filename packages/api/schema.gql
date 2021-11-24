@@ -18,6 +18,7 @@ input BookIn {
 type Booking {
   date: DateTime!
   id: String!
+  user: User!
 }
 
 type BookingSlot {
@@ -71,6 +72,7 @@ input LoginIn {
 
 type Mutation {
   book(input: BookIn!, spaceId: String!): Booking!
+  cancelBooking(bookingId: String!): Boolean!
   changePassword(input: ChangePasswordIn!): ChangePasswordOut!
   createSpace(input: CreateSpaceIn!): CreateSpaceOut!
   forgotPassword(input: ForgotPasswordIn!): ForgotPasswordOut!

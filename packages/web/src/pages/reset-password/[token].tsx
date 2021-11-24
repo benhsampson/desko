@@ -1,10 +1,13 @@
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
-import { partition } from '../../lib/utils/partition';
+
+import ErrorList from '../../components/ErrorList';
+import { partitionErrors } from '../../lib/utils/partitionErrors';
 import withApollo from '../../lib/utils/withApollo';
 import {
   ResetPasswordIn,
+  UserError,
   useResetPasswordMutation,
 } from '../../__generated__/graphql';
 
@@ -19,7 +22,7 @@ function ResetPasswordPage() {
     formState: { errors },
   } = useForm<ResetPasswordIn>();
 
-  const [genericErrors, setGenericErrors] = useState<string[]>([]);
+  const [genericErrors, setGenericErrors] = useState<UserError[]>([]);
 
   const onSubmit: SubmitHandler<ResetPasswordIn> = async (input) => {
     const { token } = router.query;
@@ -30,22 +33,19 @@ function ResetPasswordPage() {
       variables: { token, ...input },
     });
 
-    if (errors) {
-      return setGenericErrors(errors.map((e) => e.message));
-    }
+    if (errors) return console.error(errors);
 
     if (data?.resetPassword.errors) {
-      const [pathErrors, nonPathErrors] = partition(
+      partitionErrors(
         data.resetPassword.errors,
-        (err) => !!err.path
+        (err) =>
+          setError(err.path as keyof ResetPasswordIn, {
+            type: 'server',
+            message: err.message,
+          }),
+        (errs) => setGenericErrors(errs)
       );
-      pathErrors.forEach(({ path, message }) =>
-        setError(path as keyof ResetPasswordIn, { type: 'server', message })
-      );
-      return setGenericErrors(nonPathErrors.map(({ message }) => message));
     }
-
-    setGenericErrors([]);
 
     await router.push('/login');
   };
@@ -53,13 +53,7 @@ function ResetPasswordPage() {
   return (
     <div>
       <form onSubmit={handleSubmit(onSubmit)}>
-        {genericErrors.length ? (
-          <ul>
-            {genericErrors.map((e, i) => (
-              <li key={i}>{e}</li>
-            ))}
-          </ul>
-        ) : null}
+        <ErrorList errors={genericErrors} />
         <input {...register('password')} />
         {errors.password?.message}
         <button type="submit">reset password</button>

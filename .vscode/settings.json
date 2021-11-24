@@ -1,4 +1,4 @@
 {
   "eslint.workingDirectories": ["packages/api", "packages/web"],
-  "cSpell.words": ["decko"]
+  "cSpell.words": ["daygrid", "decko", "fullcalendar"]
 }

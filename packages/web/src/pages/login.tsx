@@ -3,10 +3,11 @@ import { SubmitHandler, useForm } from 'react-hook-form';
 import Link from 'next/link';
 
 import withApollo from '../lib/utils/withApollo';
-import { LoginIn, useLoginMutation } from '../__generated__/graphql';
+import { LoginIn, useLoginMutation, UserError } from '../__generated__/graphql';
 import { useAuthenticate } from '../lib/utils/useAuthenticate';
-import Navbar from '../components/Navbar';
 import { useQueryVar } from '../lib/utils/useQueryVar';
+import ErrorList from '../components/ErrorList';
+import { partitionErrors } from '../lib/utils/partitionErrors';
 
 function LoginPage() {
   const [login] = useLoginMutation();
@@ -14,35 +15,25 @@ function LoginPage() {
 
   const code = useQueryVar('code');
 
-  const {
-    register,
-    handleSubmit,
-    setError,
-    formState: { errors },
-  } = useForm<LoginIn>({
-    // defaultValues: {
-    //   email: 't001@test.com',
-    //   password: 'Test1234',
-    // },
-  });
-  const [genericErrors, setGenericErrors] = useState<string[]>([]);
+  const { register, handleSubmit, setError, formState } = useForm<LoginIn>();
+  const [genericErrors, setGenericErrors] = useState<UserError[]>([]);
 
   const onSubmit: SubmitHandler<LoginIn> = async (input) => {
     const { errors, data } = await login({ variables: input });
 
-    if (errors) {
-      return setGenericErrors(errors.map((e) => e.message));
-    }
+    if (errors) return console.error(errors);
 
     if (data?.login.errors) {
-      return data.login.errors.forEach(({ path, message }) =>
-        path
-          ? setError(path as keyof LoginIn, { type: 'server', message })
-          : setGenericErrors([...genericErrors, message])
+      partitionErrors(
+        data.login.errors,
+        (err) =>
+          setError(err.path as keyof LoginIn, {
+            type: 'server',
+            message: err.message,
+          }),
+        (errs) => setGenericErrors(errs)
       );
     }
-
-    setGenericErrors([]);
 
     if (data?.login.accessToken && data.login.accessTokenExpiry) {
       await authenticate(
@@ -58,17 +49,11 @@ function LoginPage() {
       <h1>login</h1>
       {code && <h2>login to proceed to space</h2>}
       <form onSubmit={handleSubmit(onSubmit)}>
-        {genericErrors.length ? (
-          <ul>
-            {genericErrors.map((e, i) => (
-              <li key={i}>{e}</li>
-            ))}
-          </ul>
-        ) : null}
+        <ErrorList errors={genericErrors} />
         <input {...register('email')} placeholder="email" />
-        {errors.email?.message}
+        {formState.errors.email?.message}
         <input {...register('password')} placeholder="password" />
-        {errors.password?.message}
+        {formState.errors.password?.message}
         <button type="submit">login</button>
         <Link
           href={{ pathname: '/register', ...(code && { query: { code } }) }}

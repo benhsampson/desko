@@ -1,0 +1,9 @@
+mutation Book($spaceId: String!, $year: Int!, $month: Int!, $day: Int!) {
+  book(spaceId: $spaceId, input: { year: $year, month: $month, day: $day }) {
+    id
+    date
+    user {
+      fullName
+    }
+  }
+}

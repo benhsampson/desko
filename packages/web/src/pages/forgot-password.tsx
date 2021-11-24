@@ -1,11 +1,14 @@
 import { useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
+
+import ErrorList from '../components/ErrorList';
 import Navbar from '../components/Navbar';
-import { partition } from '../lib/utils/partition';
+import { partitionErrors } from '../lib/utils/partitionErrors';
 import withApollo from '../lib/utils/withApollo';
 import {
   ForgotPasswordIn,
   useForgotPasswordMutation,
+  UserError,
 } from '../__generated__/graphql';
 
 function ForgotPasswordPage() {
@@ -17,24 +20,23 @@ function ForgotPasswordPage() {
     formState: { errors },
   } = useForm<ForgotPasswordIn>();
 
-  const [genericErrors, setGenericErrors] = useState<string[]>([]);
+  const [genericErrors, setGenericErrors] = useState<UserError[]>([]);
 
   const onSubmit: SubmitHandler<ForgotPasswordIn> = async (input) => {
     const { errors, data } = await forgotPassword({ variables: input });
 
-    if (errors) {
-      return setGenericErrors(errors.map((e) => e.message));
-    }
+    if (errors) return console.error(errors);
 
     if (data?.forgotPassword.errors) {
-      const [pathErrors, nonPathErrors] = partition(
+      partitionErrors(
         data.forgotPassword.errors,
-        (err) => !!err.path
+        (err) =>
+          setError(err.path as keyof ForgotPasswordIn, {
+            type: 'server',
+            message: err.message,
+          }),
+        (errs) => setGenericErrors(errs)
       );
-      pathErrors.forEach(({ path, message }) =>
-        setError(path as keyof ForgotPasswordIn, { type: 'server', message })
-      );
-      return setGenericErrors(nonPathErrors.map(({ message }) => message));
     }
 
     setGenericErrors([]);
@@ -43,13 +45,7 @@ function ForgotPasswordPage() {
   return (
     <Navbar>
       <form onSubmit={handleSubmit(onSubmit)}>
-        {genericErrors.length ? (
-          <ul>
-            {genericErrors.map((e, i) => (
-              <li key={i}>{e}</li>
-            ))}
-          </ul>
-        ) : null}
+        <ErrorList errors={genericErrors} />
         <input {...register('email')} placeholder="email" />
         {errors.email?.message}
         <button type="submit">send reset email</button>

@@ -1,0 +1,13 @@
+query GetBookings($spaceId: String!) {
+  getBookings(spaceId: $spaceId) {
+    date
+    available
+    bookings {
+      id
+      date
+      user {
+        fullName
+      }
+    }
+  }
+}

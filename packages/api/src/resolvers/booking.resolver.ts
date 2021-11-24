@@ -26,7 +26,7 @@ import { BookingSlot } from '../types/bookingSlot.type';
 import { getDateToday } from '../utils/getToday';
 
 @Resolver(() => BookingSlot)
-export class BookingSlotResolver implements ResolverInterface<BookingSlot> {
+export class BookingResolver implements ResolverInterface<BookingSlot> {
   bookingRepo = getCustomRepository(BookingRepository);
   spaceRepo = getCustomRepository(SpaceRepository);
   userRepo = getCustomRepository(UserRepository);
@@ -45,6 +45,9 @@ export class BookingSlotResolver implements ResolverInterface<BookingSlot> {
     const existingBookingsCount = await this.bookingRepo.getCountOnDay(
       bookingSlot.date
     );
+
+    if (await this.bookingRepo.hasBookedOnDay(user, bookingSlot.date))
+      return false;
 
     return existingBookingsCount < bookingSlot.space.maxBookingsPerDay;
   }
@@ -69,21 +72,44 @@ export class BookingSlotResolver implements ResolverInterface<BookingSlot> {
 
     const today = getDateToday();
 
-    // if (date < today) {
-    //   throw new GraphQLError('Date is in the past');
-    // }
+    if (date < today) {
+      throw new GraphQLError('Date is in the past');
+    }
 
     if (
-      (await this.bookingRepo.getCountOnDay(today)) >= space.maxBookingsPerDay
+      (await this.bookingRepo.getCountOnDay(date)) >= space.maxBookingsPerDay
     ) {
       throw new GraphQLError('Too many bookings');
     }
 
-    // if (await this.bookingRepo.hasBookedOnDay(user, date)) {
-    //   throw new GraphQLError('Already booked this day');
-    // }
+    if (await this.bookingRepo.hasBookedOnDay(user, date)) {
+      throw new GraphQLError('Already booked this day');
+    }
 
     return this.bookingRepo.createAndSave(date, space, user);
+  }
+
+  @Mutation(() => Boolean)
+  @Authorized('USER')
+  async cancelBooking(
+    @Arg('bookingId') bookingId: string,
+    @Ctx() ctx: Context
+  ) {
+    const userId = getUserIdFromContextOrFail(ctx);
+
+    const booking = await this.bookingRepo.findOneOrFail({
+      where: { id: bookingId, user: { id: userId } },
+    });
+
+    const today = getDateToday();
+
+    if (booking.date < today) {
+      throw new GraphQLError('Cannot cancel previous booking');
+    }
+
+    await this.bookingRepo.softDelete(booking.id);
+
+    return true;
   }
 
   @Query(() => [BookingSlot])
@@ -91,16 +117,11 @@ export class BookingSlotResolver implements ResolverInterface<BookingSlot> {
   async getBookings(@Arg('spaceId') spaceId: string) {
     const bookings = await this.bookingRepo.find({
       where: { space: { id: spaceId } },
-      relations: ['space'],
+      relations: ['space', 'user'],
     });
 
     const groupedBookings = bookings.reduce((slots, booking) => {
       let slotIndex = slots.findIndex((slot) => {
-        console.log(
-          slot.date.getTime(),
-          booking.date.getTime(),
-          slot.date === booking.date
-        );
         return slot.date.getTime() === booking.date.getTime();
       });
 

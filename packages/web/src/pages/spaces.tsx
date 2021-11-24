@@ -64,6 +64,7 @@ const SpacesPage = () => {
 
   return (
     <Navbar>
+      <h1>Spaces</h1>
       <ul>
         {spaces.map((s) => (
           <li key={s.id}>

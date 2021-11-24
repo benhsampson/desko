@@ -1,13 +1,16 @@
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
+
+import ErrorList from '../../components/ErrorList';
 import Navbar from '../../components/Navbar';
-import { partition } from '../../lib/utils/partition';
+import { partitionErrors } from '../../lib/utils/partitionErrors';
 import withApollo from '../../lib/utils/withApollo';
 import withAuth from '../../lib/utils/withAuth';
 import {
   CreateSpaceIn,
   useCreateSpaceMutation,
+  UserError,
 } from '../../__generated__/graphql';
 
 const SpaceNewPage = () => {
@@ -22,27 +25,26 @@ const SpaceNewPage = () => {
 
   const router = useRouter();
 
-  const [genericErrors, setGenericErrors] = useState<string[]>([]);
+  const [genericErrors, setGenericErrors] = useState<UserError[]>([]);
 
   const onSubmit: SubmitHandler<CreateSpaceIn> = async (input) => {
     const { errors, data } = await createSpace({
       variables: input,
     });
 
-    if (errors) return setGenericErrors(errors.map((e) => e.message));
+    if (errors) return console.error(errors);
 
     if (data?.createSpace.errors) {
-      const [pathErrors, nonPathErrors] = partition(
-        data?.createSpace.errors || [],
-        (e) => !!e.path
+      partitionErrors(
+        data.createSpace.errors,
+        (err) =>
+          setError(err.path as keyof CreateSpaceIn, {
+            type: 'server',
+            message: err.message,
+          }),
+        (errs) => setGenericErrors(errs)
       );
-      pathErrors.forEach(({ path, message }) =>
-        setError(path as keyof CreateSpaceIn, { type: 'server', message })
-      );
-      return setGenericErrors(nonPathErrors.map((e) => e.message));
     }
-
-    setGenericErrors([]);
 
     await router.push('/spaces');
   };
@@ -51,13 +53,7 @@ const SpaceNewPage = () => {
     <Navbar>
       <h1>create new space</h1>
       <form onSubmit={handleSubmit(onSubmit)}>
-        {genericErrors.length ? (
-          <ul>
-            {genericErrors.map((e, i) => (
-              <li key={i}>{e}</li>
-            ))}
-          </ul>
-        ) : null}
+        <ErrorList errors={genericErrors} />
         <input {...register('name')} placeholder="name" />
         {errors.name?.message}
         <input

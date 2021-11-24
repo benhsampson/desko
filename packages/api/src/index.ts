@@ -11,10 +11,10 @@ import { DEFAULT_PORT } from './constants';
 import { StatusResolver } from './resolvers/status.resolver';
 import { UserResolver } from './resolvers/user.resolver';
 import { SpaceResolver } from './resolvers/space.resolver';
+import { BookingResolver } from './resolvers/booking.resolver';
 import { authChecker } from './utils/authChecker';
 import { Context } from './types/Context';
 import connectionOptions from './ormconfig';
-import { BookingSlotResolver } from './resolvers/bookingSlot.resolver';
 
 dotenv.config();
 
@@ -33,12 +33,7 @@ const REDIS_PORT =
   );
   const redis = new Redis(REDIS_PORT, process.env.REDIS_HOST);
   const schema = await buildSchema({
-    resolvers: [
-      StatusResolver,
-      UserResolver,
-      SpaceResolver,
-      BookingSlotResolver,
-    ],
+    resolvers: [StatusResolver, UserResolver, SpaceResolver, BookingResolver],
     emitSchemaFile: true,
     authChecker,
   });

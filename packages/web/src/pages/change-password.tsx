@@ -1,11 +1,14 @@
 import { useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
+
+import ErrorList from '../components/ErrorList';
 import Navbar from '../components/Navbar';
-import { partition } from '../lib/utils/partition';
+import { partitionErrors } from '../lib/utils/partitionErrors';
 import withApollo from '../lib/utils/withApollo';
 import {
   ChangePasswordIn,
   useChangePasswordMutation,
+  UserError,
 } from '../__generated__/graphql';
 
 function ChangePasswordPage() {
@@ -17,24 +20,23 @@ function ChangePasswordPage() {
     formState: { errors },
   } = useForm<ChangePasswordIn>();
 
-  const [genericErrors, setGenericErrors] = useState<string[]>([]);
+  const [genericErrors, setGenericErrors] = useState<UserError[]>([]);
 
   const onSubmit: SubmitHandler<ChangePasswordIn> = async (input) => {
     const { errors, data } = await changePassword({ variables: input });
 
-    if (errors) {
-      return setGenericErrors(errors.map((e) => e.message));
-    }
+    if (errors) return console.error(errors);
 
     if (data?.changePassword.errors) {
-      const [pathErrors, nonPathErrors] = partition(
+      partitionErrors(
         data.changePassword.errors,
-        (err) => !!err.path
+        (err) =>
+          setError(err.path as keyof ChangePasswordIn, {
+            type: 'server',
+            message: err.message,
+          }),
+        (errs) => setGenericErrors(errs)
       );
-      pathErrors.forEach(({ path, message }) =>
-        setError(path as keyof ChangePasswordIn, { type: 'server', message })
-      );
-      return setGenericErrors(nonPathErrors.map(({ message }) => message));
     }
 
     setGenericErrors([]);
@@ -43,13 +45,7 @@ function ChangePasswordPage() {
   return (
     <Navbar>
       <form onSubmit={handleSubmit(onSubmit)}>
-        {genericErrors.length ? (
-          <ul>
-            {genericErrors.map((e, i) => (
-              <li key={i}>{e}</li>
-            ))}
-          </ul>
-        ) : null}
+        <ErrorList errors={genericErrors} />
         <input {...register('newPassword')} placeholder="new password" />
         {errors.newPassword?.message}
         <input
