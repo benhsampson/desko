@@ -28,6 +28,7 @@ import Navbar from '../../../components/Navbar';
 import withAuth from '../../../lib/utils/withAuth';
 import { MAX_DAY_EVENT_ROWS } from '../../../lib/constants';
 import ErrorList from '../../../components/ErrorList';
+import { isInPast } from '../../../lib/utils/isInPast';
 
 type Props = {
   prettyBaseUrl: string;
@@ -65,11 +66,12 @@ const SpacePage: NextPage<Props> = ({ prettyBaseUrl, rawBaseUrl }) => {
       const dateStr = slot.date as string;
       const startDate = new Date(dateStr);
 
-      if (!slot.isAvailable) {
+      if (!slot.isAvailable && !isInPast(startDate)) {
         _events.push({
           id: dateStr,
           display: 'background',
           start: startDate,
+          backgroundColor: 'lightgrey',
           extendedProps: {
             isBackground: true,
           },
@@ -188,9 +190,7 @@ const SpacePage: NextPage<Props> = ({ prettyBaseUrl, rawBaseUrl }) => {
                     eventClick={handleEventClick}
                     eventContent={renderEventContent}
                     dayCellContent={renderDayCellContent}
-                    selectAllow={({ start }) => {
-                      return start.getTime() >= new Date().setHours(0, 0, 0, 0);
-                    }}
+                    selectAllow={({ start }) => !isInPast(start)}
                     selectOverlap={(event) => !!event.extendedProps.isAvailable}
                     dayMaxEventRows={MAX_DAY_EVENT_ROWS}
                     defaultAllDay
