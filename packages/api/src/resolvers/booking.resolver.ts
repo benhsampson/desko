@@ -42,6 +42,7 @@ export class BookingResolver implements ResolverInterface<BookingSlot> {
     if (!user || !user.roles.some((r) => r.value === 'USER')) return false;
 
     const existingBookingsCount = await this.bookingRepo.getCountOnDay(
+      bookingSlot.space,
       bookingSlot.date
     );
 
@@ -83,7 +84,8 @@ export class BookingResolver implements ResolverInterface<BookingSlot> {
     }
 
     if (
-      (await this.bookingRepo.getCountOnDay(date)) >= space.maxBookingsPerDay
+      (await this.bookingRepo.getCountOnDay(space, date)) >=
+      space.maxBookingsPerDay
     ) {
       return {
         errors: [

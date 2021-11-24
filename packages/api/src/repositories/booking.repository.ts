@@ -14,8 +14,8 @@ export class BookingRepository extends Repository<Booking> {
     return this.manager.save(booking);
   }
 
-  getCountOnDay(day: Date) {
-    return this.manager.count(Booking, { where: { date: day } });
+  getCountOnDay(space: Space, day: Date) {
+    return this.manager.count(Booking, { where: { date: day, space } });
   }
 
   async hasBookedOnDay(user: User, space: Space, day: Date) {
