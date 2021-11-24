@@ -60,6 +60,11 @@ export class UserResolver {
     }
 
     const hashedPassword = await argon2.hash(input.password);
+
+    if (await this.userRepository.findByEmail(input.email)) {
+      return { errors: [{ path: 'email', message: 'Email taken' }] };
+    }
+
     const user = await this.userRepository.createAndSave(
       input.fullName,
       input.email,
