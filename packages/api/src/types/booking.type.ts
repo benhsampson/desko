@@ -1,4 +1,6 @@
-import { Field, InputType, Int } from 'type-graphql';
+import { Field, InputType, Int, ObjectType } from 'type-graphql';
+import { Booking } from '../entities/booking.entity';
+import { UserError } from './UserError';
 
 @InputType()
 export class BookIn {
@@ -10,4 +12,13 @@ export class BookIn {
 
   @Field(() => Int)
   day!: number;
+}
+
+@ObjectType()
+export class BookOut {
+  @Field(() => [UserError], { nullable: true })
+  errors?: UserError[];
+
+  @Field(() => Booking, { nullable: true })
+  booking?: Booking;
 }

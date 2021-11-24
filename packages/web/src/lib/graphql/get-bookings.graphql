@@ -1,10 +1,11 @@
 query GetBookings($spaceId: String!) {
   getBookings(spaceId: $spaceId) {
     date
-    available
+    isAvailable
     bookings {
       id
       date
+      canCancel
       user {
         fullName
       }

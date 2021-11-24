@@ -12,11 +12,10 @@ import {
 } from 'type-graphql';
 import { getCustomRepository } from 'typeorm';
 
-import { Booking } from '../entities/booking.entity';
 import { BookingRepository } from '../repositories/booking.repository';
 import { SpaceRepository } from '../repositories/space.repository';
 import { UserRepository } from '../repositories/user.repository';
-import { BookIn } from '../types/booking.type';
+import { BookIn, BookOut } from '../types/booking.type';
 import { Context } from '../types/Context';
 import {
   getUserIdFromContext,
@@ -32,7 +31,7 @@ export class BookingResolver implements ResolverInterface<BookingSlot> {
   userRepo = getCustomRepository(UserRepository);
 
   @FieldResolver()
-  async available(@Root() bookingSlot: BookingSlot, @Ctx() ctx: Context) {
+  async isAvailable(@Root() bookingSlot: BookingSlot, @Ctx() ctx: Context) {
     if (bookingSlot.date < getDateToday()) return false;
 
     const userId = getUserIdFromContext(ctx);
@@ -46,19 +45,26 @@ export class BookingResolver implements ResolverInterface<BookingSlot> {
       bookingSlot.date
     );
 
-    if (await this.bookingRepo.hasBookedOnDay(user, bookingSlot.date))
+    if (
+      await this.bookingRepo.hasBookedOnDay(
+        user,
+        bookingSlot.space,
+        bookingSlot.date
+      )
+    ) {
       return false;
+    }
 
     return existingBookingsCount < bookingSlot.space.maxBookingsPerDay;
   }
 
-  @Mutation(() => Booking)
+  @Mutation(() => BookOut)
   @Authorized('USER')
   async book(
     @Arg('spaceId') spaceId: string,
     @Arg('input') input: BookIn,
     @Ctx() ctx: Context
-  ): Promise<Booking> {
+  ): Promise<BookOut> {
     const userId = getUserIdFromContextOrFail(ctx);
     const user = await this.userRepo.findOneOrFail(userId);
 
@@ -79,14 +85,25 @@ export class BookingResolver implements ResolverInterface<BookingSlot> {
     if (
       (await this.bookingRepo.getCountOnDay(date)) >= space.maxBookingsPerDay
     ) {
-      throw new GraphQLError('Too many bookings');
+      return {
+        errors: [
+          {
+            message:
+              'Too many bookings! Please refresh this page to see the latest bookings',
+          },
+        ],
+      };
     }
 
-    if (await this.bookingRepo.hasBookedOnDay(user, date)) {
+    if (await this.bookingRepo.hasBookedOnDay(user, space, date)) {
       throw new GraphQLError('Already booked this day');
     }
 
-    return this.bookingRepo.createAndSave(date, space, user);
+    const booking = await this.bookingRepo.createAndSave(date, space, user);
+
+    return {
+      booking,
+    };
   }
 
   @Mutation(() => Boolean)
@@ -114,10 +131,19 @@ export class BookingResolver implements ResolverInterface<BookingSlot> {
 
   @Query(() => [BookingSlot])
   @Authorized()
-  async getBookings(@Arg('spaceId') spaceId: string) {
-    const bookings = await this.bookingRepo.find({
-      where: { space: { id: spaceId } },
-      relations: ['space', 'user'],
+  async getBookings(@Arg('spaceId') spaceId: string, @Ctx() ctx: Context) {
+    const userId = getUserIdFromContextOrFail(ctx);
+
+    const bookings = (
+      await this.bookingRepo.find({
+        where: { space: { id: spaceId } },
+        relations: ['space', 'user'],
+      })
+    ).map((booking) => {
+      const isTodayOrFuture = booking.date >= getDateToday();
+      const ownsBooking = booking.user.id === userId;
+      booking.canCancel = isTodayOrFuture && ownsBooking;
+      return booking;
     });
 
     const groupedBookings = bookings.reduce((slots, booking) => {

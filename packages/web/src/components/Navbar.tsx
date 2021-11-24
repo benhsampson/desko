@@ -21,11 +21,11 @@ const Navbar = observer(({ children }: Props) => {
           <Link href="/change-password">change password</Link>
         </div>
       ) : (
-        <>
+        <div>
           <Link href="/login">login</Link>
           <br />
           <Link href="/register">register</Link>
-        </>
+        </div>
       )}
       {children}
     </div>

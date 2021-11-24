@@ -14,5 +14,5 @@ export class BookingSlot {
   bookings!: Booking[];
 
   @Field({ nullable: true })
-  available?: boolean;
+  isAvailable?: boolean;
 }

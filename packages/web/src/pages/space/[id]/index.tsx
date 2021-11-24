@@ -1,6 +1,6 @@
 import { NextPage } from 'next';
 import Link from 'next/link';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import FullCalendar from '@fullcalendar/react';
 import interactionPlugin from '@fullcalendar/interaction';
@@ -17,6 +17,7 @@ import {
   useBookMutation,
   useCancelBookingMutation,
   useGetBookingsQuery,
+  UserError,
   useSpaceInfoQuery,
   useUserInfoQuery,
 } from '../../../__generated__/graphql';
@@ -25,6 +26,8 @@ import withApollo from '../../../lib/utils/withApollo';
 import getBaseUrl from '../../../lib/utils/getBaseUrl';
 import Navbar from '../../../components/Navbar';
 import withAuth from '../../../lib/utils/withAuth';
+import { MAX_DAY_EVENT_ROWS } from '../../../lib/constants';
+import ErrorList from '../../../components/ErrorList';
 
 type Props = {
   prettyBaseUrl: string;
@@ -34,12 +37,15 @@ type Props = {
 const SpacePage: NextPage<Props> = ({ prettyBaseUrl, rawBaseUrl }) => {
   const spaceId = useQueryVar('id') || '404';
 
+  const [globalErrors, setGlobalErrors] = useState<UserError[]>([]);
+
   const userInfo = useUserInfoQuery();
   const spaceInfo = useSpaceInfoQuery({
     variables: { spaceId },
   });
   const getBookings = useGetBookingsQuery({
     variables: { spaceId },
+    fetchPolicy: 'no-cache',
   });
   const [book] = useBookMutation({
     refetchQueries: ['GetBookings'],
@@ -48,6 +54,10 @@ const SpacePage: NextPage<Props> = ({ prettyBaseUrl, rawBaseUrl }) => {
     refetchQueries: ['GetBookings'],
   });
 
+  const canInteract = !!userInfo.data?.userInfo.roles.some(
+    (role) => role.value === 'USER'
+  );
+
   const events = useMemo(() => {
     const _events: EventInput[] = [];
 
@@ -55,7 +65,7 @@ const SpacePage: NextPage<Props> = ({ prettyBaseUrl, rawBaseUrl }) => {
       const dateStr = slot.date as string;
       const startDate = new Date(dateStr);
 
-      if (!slot.available) {
+      if (!slot.isAvailable) {
         _events.push({
           id: dateStr,
           display: 'background',
@@ -72,7 +82,8 @@ const SpacePage: NextPage<Props> = ({ prettyBaseUrl, rawBaseUrl }) => {
           title: booking.user.fullName,
           start: startDate,
           extendedProps: {
-            available: slot.available,
+            isAvailable: !!slot.isAvailable,
+            canCancel: !!booking.canCancel,
           },
         })
       );
@@ -83,10 +94,14 @@ const SpacePage: NextPage<Props> = ({ prettyBaseUrl, rawBaseUrl }) => {
 
   const handleDateSelect = useCallback(
     async (selectInfo: DateSelectArg) => {
+      console.log(selectInfo);
+
+      if (!canInteract) return;
+
       const calendarApi = selectInfo.view.calendar;
       calendarApi.unselect();
 
-      const { errors } = await book({
+      const { errors, data } = await book({
         variables: {
           spaceId,
           year: selectInfo.start.getFullYear(),
@@ -96,18 +111,21 @@ const SpacePage: NextPage<Props> = ({ prettyBaseUrl, rawBaseUrl }) => {
       });
 
       if (errors) return console.error(errors);
+
+      if (data?.book.errors) return setGlobalErrors(data.book.errors);
+
+      setGlobalErrors([]);
     },
-    [book, spaceId]
+    [book, canInteract, spaceId]
   );
 
   const handleEventClick = useCallback(
     async (clickInfo: EventClickArg) => {
-      console.log(clickInfo.event);
+      if (!canInteract) return;
 
       if (
         clickInfo.event.extendedProps.isBackground ||
-        !clickInfo.event.start ||
-        clickInfo.event.start.getTime() < new Date().setHours(0, 0, 0, 0)
+        !clickInfo.event.extendedProps.canCancel
       )
         return;
 
@@ -115,21 +133,21 @@ const SpacePage: NextPage<Props> = ({ prettyBaseUrl, rawBaseUrl }) => {
         variables: { bookingId: clickInfo.event.id },
       });
     },
-    [cancelBooking]
+    [cancelBooking, canInteract]
   );
 
   const renderEventContent = (eventContent: EventContentArg) => (
-    <div>{eventContent.event.title}</div>
-  );
-
-  const renderDayCellContent = ({
-    dayNumberText,
-    isPast,
-  }: DayCellContentArg) => (
-    <div style={{ backgroundColor: isPast ? 'gray' : 'white' }}>
-      {dayNumberText}
+    <div>
+      <span>{eventContent.event.title}</span>
+      {eventContent.event._def.extendedProps.canCancel && (
+        <button>cancel</button>
+      )}
     </div>
   );
+
+  const renderDayCellContent = ({ dayNumberText }: DayCellContentArg) => {
+    return <div>{dayNumberText}</div>;
+  };
 
   return (
     <Navbar>
@@ -158,23 +176,24 @@ const SpacePage: NextPage<Props> = ({ prettyBaseUrl, rawBaseUrl }) => {
             ) : (
               <p>loading...</p>
             )}
+            <ErrorList errors={globalErrors} />
             {!getBookings.loading ? (
               !getBookings.error && getBookings.data ? (
                 <div>
                   <FullCalendar
                     plugins={[interactionPlugin, dayGridPlugin]}
                     events={events}
+                    selectable={canInteract}
+                    select={handleDateSelect}
+                    eventClick={handleEventClick}
+                    eventContent={renderEventContent}
+                    dayCellContent={renderDayCellContent}
                     selectAllow={({ start }) => {
                       return start.getTime() >= new Date().setHours(0, 0, 0, 0);
                     }}
-                    selectOverlap={(event) => !!event.extendedProps.available}
-                    select={handleDateSelect}
-                    eventClick={handleEventClick}
-                    dayMaxEventRows={4}
-                    eventContent={renderEventContent}
-                    dayCellContent={renderDayCellContent}
+                    selectOverlap={(event) => !!event.extendedProps.isAvailable}
+                    dayMaxEventRows={MAX_DAY_EVENT_ROWS}
                     defaultAllDay
-                    selectable
                   />
                 </div>
               ) : (

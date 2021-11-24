@@ -15,16 +15,22 @@ input BookIn {
   year: Int!
 }
 
+type BookOut {
+  booking: Booking
+  errors: [UserError!]
+}
+
 type Booking {
+  canCancel: Boolean
   date: DateTime!
   id: String!
   user: User!
 }
 
 type BookingSlot {
-  available: Boolean
   bookings: [Booking!]!
   date: DateTime!
+  isAvailable: Boolean
   space: Space!
 }
 
@@ -71,7 +77,7 @@ input LoginIn {
 }
 
 type Mutation {
-  book(input: BookIn!, spaceId: String!): Booking!
+  book(input: BookIn!, spaceId: String!): BookOut!
   cancelBooking(bookingId: String!): Boolean!
   changePassword(input: ChangePasswordIn!): ChangePasswordOut!
   createSpace(input: CreateSpaceIn!): CreateSpaceOut!

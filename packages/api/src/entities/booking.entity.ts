@@ -30,4 +30,7 @@ export class Booking {
   @ManyToOne(() => User, (user) => user.bookings)
   @Field(() => User)
   user!: User;
+
+  @Field({ nullable: true })
+  canCancel?: boolean;
 }
