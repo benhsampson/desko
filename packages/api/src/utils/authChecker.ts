@@ -16,7 +16,7 @@ export const authChecker: AuthChecker<Context> = async ({ context }, roles) => {
   const authorized =
     !!user &&
     (roles.length === 0 ||
-      (await user.roles).some((role) => roles.includes(role.value)));
+      user.roles.some((role) => roles.includes(role.value)));
 
   if (!authorized)
     throw new AuthenticationError('Unauthorized/unauthenticated');

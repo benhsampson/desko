@@ -4,7 +4,9 @@
   "main": "dist/index.js",
   "license": "MIT",
   "scripts": {
-    "dev": "nodemon --watch . --ext ts,env,json --exec \"ts-node src/index.ts\"",
+    "dev": "nodemon --watch . --ext ts --exec \"ts-node -r tsconfig-paths/register src/index.ts\"",
+    "build": "tsc --build",
+    "clean": "tsc --build --clean",
     "_typeorm": "ts-node ../../node_modules/typeorm/cli.js",
     "migrate:create": "yarn _typeorm migration:create -d src/migrations/ -f src/ormconfig.ts -n",
     "migrate:up": "yarn _typeorm migration:run -f src/ormconfig.ts",
@@ -40,6 +42,7 @@
     "@types/ms": "^0.7.31",
     "@types/nodemailer": "^6.4.4",
     "@types/uuid": "^8.3.3",
-    "nodemon": "^2.0.15"
+    "nodemon": "^2.0.15",
+    "typescript": "^4.5.2"
   }
 }

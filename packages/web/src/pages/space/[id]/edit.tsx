@@ -60,6 +60,7 @@ const SpaceEditPage = () => {
 
     const { errors, data } = await updateSpace({
       variables: { spaceId, ...dirtyInput },
+      refetchQueries: ['SpaceInfo'],
     });
 
     if (errors) return console.error(errors);

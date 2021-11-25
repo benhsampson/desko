@@ -35,7 +35,7 @@ const SpaceNewPage = () => {
     if (errors) return console.error(errors);
 
     if (data?.createSpace.errors) {
-      partitionErrors(
+      return partitionErrors(
         data.createSpace.errors,
         (err) =>
           setError(err.path as keyof CreateSpaceIn, {
@@ -59,6 +59,7 @@ const SpaceNewPage = () => {
         <input
           {...register('maxBookingsPerDay', {
             valueAsNumber: true,
+            required: true,
           })}
           placeholder="max bookings per day"
           type="number"

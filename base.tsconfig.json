@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "allowJs": true,
+    "baseUrl": ".",
     "isolatedModules": true,
     "lib": ["dom", "dom.iterable", "esnext"],
     "module": "commonjs",
