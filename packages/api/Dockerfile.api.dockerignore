@@ -2,10 +2,9 @@
 !package.json
 !yarn.lock
 !.env
-!packages/api/package.json
-!packages/api/.env
 !base.tsconfig.json
 !tsconfig.json
+!packages/api/package.json
+!packages/api/.env
 !packages/api/tsconfig.json
-!packages/api/src
-!packages/api/dist
+!packages/api/src/

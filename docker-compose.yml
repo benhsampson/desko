@@ -20,7 +20,7 @@ services:
   desko-api:
     build:
       context: ./
-      dockerfile: packages/api/Dockerfile
+      dockerfile: packages/api/Dockerfile.api
     restart: unless-stopped
     environment:
       REDIS_HOST: 'desko-redis://cache'
