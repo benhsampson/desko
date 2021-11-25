@@ -12,6 +12,7 @@ import {
 import { onError } from '@apollo/client/link/error';
 import { mergeDeep } from '@apollo/client/utilities';
 import nookies from 'nookies';
+import { ParsedUrlQuery } from 'querystring';
 
 import config from './config';
 import { useAccessToken } from './useAccessToken';
@@ -22,7 +23,7 @@ type ApolloState = NormalizedCacheObject;
 type WithApolloParams = {
   apolloClient: ApolloClient<ApolloState>;
   apolloState: ApolloState;
-  query: qs.ParsedQs;
+  query: ParsedUrlQuery;
 };
 
 type WithApolloContext = NextPageContext & WithApolloParams;

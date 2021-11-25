@@ -1,0 +1,15 @@
+*
+!package.json
+!yarn.lock
+!.env
+!base.tsconfig.json
+!tsconfig.json
+!base.eslintrc.json
+!packages/web/package.json
+!packages/web/.env
+!packages/web/tsconfig.json
+!packages/web/next.config.js
+!packages/web/.eslintrc.json
+!packages/web/src/
+!packages/web/public/
+

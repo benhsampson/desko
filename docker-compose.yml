@@ -2,12 +2,9 @@ version: '3.9'
 services:
   desko-db:
     image: mysql:8.0
-    # command: --default-authentication-plugin=mysql_native_password
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: '${DB_PASSWORD}'
-      # MYSQL_USER: '${DB_USERNAME}'
-      # MYSQL_PASSWORD: '${DB_PASSWORD}'
       MYSQL_DATABASE: '${DB_DATABASE}'
     expose:
       - '3306'
@@ -25,8 +22,8 @@ services:
     environment:
       REDIS_HOST: 'desko-redis://cache'
     ports:
-      - '4000:4000'
-    links:
+      - '${API_PORT}:${API_PORT}'
+    depends_on:
       - desko-db
       - desko-redis
     networks:
@@ -34,9 +31,11 @@ services:
   desko-phpmyadmin:
     image: phpmyadmin/phpmyadmin
     restart: always
+    expose:
+      - '80'
     ports:
-      - '5555:80'
-    links:
+      - '${PHPMYADMIN_PORT}:80'
+    depends_on:
       - desko-db
     environment:
       PMA_HOST: desko-db
@@ -49,6 +48,8 @@ services:
     container_name: cache
     expose:
       - '6379'
+    ports:
+      - '${REDIS_PORT}:6379'
     networks:
       - backend-network
 volumes:
