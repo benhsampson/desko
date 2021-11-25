@@ -23,6 +23,7 @@ const REDIS_PORT =
   process.env.REDIS_PORT?.length && parseInt(process.env.REDIS_PORT, 10);
 
 (async () => {
+  console.log(connectionOptions);
   await createConnection(connectionOptions);
   const app = express();
   app.use(
@@ -31,6 +32,7 @@ const REDIS_PORT =
       credentials: true,
     })
   );
+  console.log(REDIS_PORT, process.env.REDIS_HOST);
   const redis = new Redis(REDIS_PORT, process.env.REDIS_HOST);
   const schema = await buildSchema({
     resolvers: [StatusResolver, UserResolver, SpaceResolver, BookingResolver],

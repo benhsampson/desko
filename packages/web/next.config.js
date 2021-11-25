@@ -7,4 +7,7 @@ module.exports = withTranspiledModules({
   publicRuntimeConfig: {
     API_URL: process.env.API_URL,
   },
+  experimental: {
+    externalDir: true,
+  },
 });
