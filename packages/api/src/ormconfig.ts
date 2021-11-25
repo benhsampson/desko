@@ -19,7 +19,9 @@ const connectionOptions: ConnectionOptions = {
   logging: process.env.DB_LOGGING === 'true',
   synchronize: process.env.DB_SYNCHRONIZE === 'true',
   entities: [User, Role, Space, Booking],
-  migrations: [`src/migrations/**/*.ts`],
+  migrations: process.env.DB_MIGRATIONS
+    ? [process.env.DB_MIGRATIONS]
+    : undefined,
 };
 
 export default connectionOptions;
