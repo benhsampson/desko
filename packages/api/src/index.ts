@@ -19,8 +19,8 @@ import connectionOptions from './ormconfig';
 dotenv.config();
 
 const PORT = parseInt(process.env.PORT || DEFAULT_PORT, 10);
-const REDIS_PORT =
-  process.env.REDIS_PORT?.length && parseInt(process.env.REDIS_PORT, 10);
+// const REDIS_PORT =
+//   process.env.REDIS_PORT?.length && parseInt(process.env.REDIS_PORT, 10);
 
 (async () => {
   console.log(connectionOptions);
@@ -32,8 +32,8 @@ const REDIS_PORT =
       credentials: true,
     })
   );
-  console.log(REDIS_PORT, process.env.REDIS_HOST);
-  const redis = new Redis(REDIS_PORT, process.env.REDIS_HOST);
+  console.log(process.env.REDIS_URL);
+  const redis = new Redis(process.env.REDIS_URL);
   const schema = await buildSchema({
     resolvers: [StatusResolver, UserResolver, SpaceResolver, BookingResolver],
     emitSchemaFile: true,
