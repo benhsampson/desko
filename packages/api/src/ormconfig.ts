@@ -1,4 +1,10 @@
-import dotenv from 'dotenv';
+import dotenvFlow from 'dotenv-flow';
+import path from 'path';
+dotenvFlow.config({ path: path.join(__dirname, '../../../') });
+// dotenvFlow.config();
+
+console.log(process.env);
+
 import { ConnectionOptions } from 'typeorm';
 
 import { DEFAULT_DB_PORT } from './constants';
@@ -6,8 +12,6 @@ import { Booking } from './entities/booking.entity';
 import { Role } from './entities/role.entity';
 import { Space } from './entities/space.entity';
 import { User } from './entities/user.entity';
-
-dotenv.config();
 
 const connectionOptions: ConnectionOptions = {
   type: 'mysql',

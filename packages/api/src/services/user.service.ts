@@ -11,7 +11,7 @@ import {
 } from '../constants';
 import { Context } from '../types/Context';
 
-const IS_PROD = process.env.NODE_ENV === 'production';
+// const IS_PROD = process.env.NODE_ENV === 'production';
 
 const generateTokens = (payload: object) => {
   if (!process.env.ACCESS_TOKEN_SECRET || !process.env.REFRESH_TOKEN_SECRET) {
@@ -86,7 +86,9 @@ export const authenticate = async (ctx: Context, userId: string) => {
 
   ctx.res.cookie(REFRESH_TOKEN_COOKIE_NAME, refreshToken, {
     httpOnly: false,
-    secure: IS_PROD,
+    // TODO: Change once HTTPS is in place
+    // secure: IS_PROD,
+    secure: false,
     domain: process.env.COOKIE_DOMAIN,
   });
 

@@ -4,7 +4,9 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "docker:up": "cross-env COMPOSE_DOCKER_CLI_BUILD=1 DOCKER_BUILDKIT=1 docker-compose up -d"
+    "_docker_compose": "cross-env COMPOSE_DOCKER_CLI_BUILD=1 DOCKER_BUILDKIT=1 BUILDKIT_PROGRESS=plain docker -c remote compose",
+    "docker:build": "yarn _docker_compose build",
+    "docker:up": "yarn _docker_compose up"
   },
   "workspaces": [
     "packages/*"

@@ -1,5 +1,5 @@
 import { useAccessToken } from './useAccessToken';
-import config from './config';
+// import config from './config';
 
 type RefreshTokenResponse = {
   errors?: [];
@@ -12,7 +12,7 @@ type RefreshTokenResponse = {
 };
 
 export const authenticateWithRefreshToken = (oldRefreshToken: string) =>
-  fetch(config.API_URL, {
+  fetch(process.env.NEXT_PUBLIC_API_URL || '', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include',

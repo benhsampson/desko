@@ -14,7 +14,7 @@ import { mergeDeep } from '@apollo/client/utilities';
 import nookies from 'nookies';
 import { ParsedUrlQuery } from 'querystring';
 
-import config from './config';
+// import config from './config';
 import { useAccessToken } from './useAccessToken';
 import { authenticateWithRefreshToken } from './renewAccessToken';
 
@@ -31,7 +31,7 @@ type WithApolloContext = NextPageContext & WithApolloParams;
 const SSR_MODE = typeof window === 'undefined';
 
 const httpLink = createHttpLink({
-  uri: config.API_URL,
+  uri: process.env.NEXT_PUBLIC_API_URL,
   credentials: 'include',
 });
 

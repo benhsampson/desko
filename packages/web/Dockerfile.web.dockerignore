@@ -6,7 +6,8 @@
 !tsconfig.json
 !base.eslintrc.json
 !packages/web/package.json
-!packages/web/.env
+!packages/web/.env.production
+!packages/web/.env.production.local
 !packages/web/tsconfig.json
 !packages/web/next.config.js
 !packages/web/.eslintrc.json

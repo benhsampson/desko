@@ -7,10 +7,13 @@
     "dev": "nodemon --watch . --ext ts --exec \"ts-node -r tsconfig-paths/register src/index.ts\"",
     "build": "tsc --build",
     "clean": "tsc --build --clean",
-    "_typeorm": "ts-node ../../node_modules/typeorm/cli.js",
-    "migrate:create": "yarn _typeorm migration:create -d src/migrations/ -f src/ormconfig.ts -n",
-    "migrate:up": "yarn _typeorm migration:run -f src/ormconfig.ts",
-    "migrate:down": "yarn _typeorm migration:revert -f src/ormconfig.ts",
+    "ts:typeorm": "ts-node ../../node_modules/typeorm/cli.js",
+    "ts:migrate:create": "yarn ts:typeorm migration:create -d src/migrations/ -f src/ormconfig.ts -n",
+    "ts:migrate:up": "yarn ts:typeorm migration:run -f src/ormconfig.ts",
+    "ts:migrate:down": "yarn ts:typeorm migration:revert -f src/ormconfig.ts",
+    "js:typeorm": "node -r dotenv-flow/config ../../node_modules/typeorm/cli.js",
+    "js:migrate:up": "yarn js:typeorm migration:run -f dist/ormconfig.js",
+    "js:migrate:down": "yarn js:typeorm migration:revert -f dist/ormconfig.js",
     "lint": "eslint src/**"
   },
   "dependencies": {
@@ -20,6 +23,7 @@
     "connect-redis": "^6.0.0",
     "cors": "^2.8.5",
     "dotenv": "^10.0.0",
+    "dotenv-flow": "^3.2.0",
     "express": "^4.17.1",
     "graphql": "^15.3.0",
     "ioredis": "^4.28.0",
@@ -36,6 +40,7 @@
   },
   "devDependencies": {
     "@types/connect-redis": "^0.0.17",
+    "@types/dotenv-flow": "^3.2.0",
     "@types/express-session": "^1.17.4",
     "@types/ioredis": "^4.28.1",
     "@types/jsonwebtoken": "^8.5.6",
@@ -43,6 +48,7 @@
     "@types/nodemailer": "^6.4.4",
     "@types/uuid": "^8.3.3",
     "nodemon": "^2.0.15",
+    "ts-node": "^10.4.0",
     "typescript": "^4.5.2"
   }
 }

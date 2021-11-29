@@ -5,6 +5,7 @@
 !base.tsconfig.json
 !tsconfig.json
 !packages/api/package.json
-!packages/api/.env
+!packages/api/.env.production
+!packages/api/.env.production.local
 !packages/api/tsconfig.json
 !packages/api/src/

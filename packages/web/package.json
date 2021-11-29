@@ -5,7 +5,7 @@
   "license": "MIT",
   "scripts": {
     "codegen": "graphql-codegen",
-    "dev": "yarn codegen && next dev",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start"
   },
