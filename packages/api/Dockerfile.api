@@ -10,6 +10,7 @@ ENV NODE_ENV production
 COPY --from=base /app/base/package.json ./
 COPY --from=base /app/base/yarn.lock ./
 COPY --from=base /app/base/packages/api/package.json packages/api/
+# FIX: Needs to copy to packages/api/
 COPY --from=base /app/base/packages/api/.env.production ./
 COPY --from=base /app/base/packages/api/.env.production.local ./
 COPY --from=base /app/base/packages/api/dist/ packages/api/dist/

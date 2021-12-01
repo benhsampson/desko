@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { SubmitHandler, useForm } from 'react-hook-form';
 
-import Navbar from '../../../components/Navbar';
 import { useQueryVar } from '../../../lib/utils/useQueryVar';
 import withApollo from '../../../lib/utils/withApollo';
 import withAuth from '../../../lib/utils/withAuth';
@@ -14,6 +13,7 @@ import {
 } from '../../../__generated__/graphql';
 import { partitionErrors } from '../../../lib/utils/partitionErrors';
 import ErrorList from '../../../components/ErrorList';
+import DashboardLayout from 'packages/web/src/components/DashboardLayout';
 
 const SpaceEditPage = () => {
   // TODO: Check if null in getInitialProps()
@@ -86,7 +86,7 @@ const SpaceEditPage = () => {
   };
 
   return (
-    <Navbar>
+    <DashboardLayout>
       {!spaceInfo.loading && spaceInfo.data ? (
         <h1>
           edit{' '}
@@ -112,7 +112,7 @@ const SpaceEditPage = () => {
         {errors.maxBookingsPerDay?.message}
         <button type="submit">save</button>
       </form>
-    </Navbar>
+    </DashboardLayout>
   );
 };
 

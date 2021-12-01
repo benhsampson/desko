@@ -1,11 +1,22 @@
-import { AppProps } from 'next/app';
+import { AppProps as NextAppProps } from 'next/app';
+import Head from 'next/head';
+import { CssBaseline, ThemeProvider } from '@mui/material';
 
-function App({ Component, pageProps }: AppProps) {
+import theme from '../lib/styles/theme';
+
+const App = ({ Component, pageProps }: NextAppProps) => {
   return (
     <>
-      <Component {...pageProps} />
+      <Head>
+        <title>desko.io</title>
+        <meta name="viewport" content="initial-scale=1, width=device-width" />
+      </Head>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <Component {...pageProps} />
+      </ThemeProvider>
     </>
   );
-}
+};
 
 export default App;

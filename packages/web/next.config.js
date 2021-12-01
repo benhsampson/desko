@@ -10,4 +10,7 @@ module.exports = withTranspiledModules({
   experimental: {
     externalDir: true,
   },
+  async redirects() {
+    return [{ source: '/', destination: '/spaces', permanent: true }];
+  },
 });

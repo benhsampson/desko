@@ -1,8 +1,5 @@
-// import dotenv from 'dotenv';
 import dotenvFlow from 'dotenv-flow';
 dotenvFlow.config();
-
-console.log(process.env);
 
 import { ApolloServer, ApolloError } from 'apollo-server-express';
 import express from 'express';
@@ -11,13 +8,6 @@ import { GraphQLError } from 'graphql';
 import Redis from 'ioredis';
 import { buildSchema } from 'type-graphql';
 import { createConnection } from 'typeorm';
-
-// dotenv.config({
-//   path: path.join(
-//     __dirname,
-//     `../.env.${process.env.NODE_ENV || 'development'}`
-//   ),
-// });
 
 import { DEFAULT_PORT } from './constants';
 import { StatusResolver } from './resolvers/status.resolver';

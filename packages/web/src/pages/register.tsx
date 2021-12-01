@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
-import Link from 'next/link';
+import { Button, Stack, TextField, Typography } from '@mui/material';
 
 import withApollo from '../lib/utils/withApollo';
 import {
@@ -12,9 +12,12 @@ import { useAuthenticate } from '../lib/utils/useAuthenticate';
 import { useQueryVar } from '../lib/utils/useQueryVar';
 import { partitionErrors } from '../lib/utils/partitionErrors';
 import ErrorList from '../components/ErrorList';
+import AuthLayout from '../components/AuthLayout';
+import Link from '../components/Link';
+import PasswordTextField from '../components/PasswordTextField';
 
 function RegisterPage() {
-  const [registerUser] = useRegisterMutation();
+  const [registerUser, { loading }] = useRegisterMutation();
   const authenticate = useAuthenticate();
 
   const code = useQueryVar('code');
@@ -50,24 +53,70 @@ function RegisterPage() {
     }
   };
 
+  const isUser = !!code;
+
   return (
-    <div>
-      <h1>register</h1>
-      {code && <h2>register to proceed to space</h2>}
+    <AuthLayout
+      mainHeading={isUser ? 'Get started to proceed.' : 'Get started for free.'}
+      subHeading={
+        isUser
+          ? 'Create an account to join this space.'
+          : 'Free forever. No credit card needed.'
+      }
+      headerContent={
+        <>
+          Already have an account?&nbsp;
+          <Link href={{ pathname: '/login', ...(code && { query: { code } }) }}>
+            Login
+          </Link>
+        </>
+      }
+    >
+      <ErrorList errors={genericErrors} />
       <form onSubmit={handleSubmit(onSubmit)}>
-        <ErrorList errors={genericErrors} />
-        <input {...register('fullName')} placeholder="full name" />
-        {formState.errors.fullName?.message}
-        <input {...register('email')} placeholder="email" />
-        {formState.errors.email?.message}
-        <input {...register('password')} placeholder="password" />
-        {formState.errors.password?.message}
-        <button type="submit">create account</button>
-        <Link href={{ pathname: '/login', ...(code && { query: { code } }) }}>
-          login
-        </Link>
+        <Stack spacing={3}>
+          <TextField
+            label="Name"
+            error={!!formState.errors.fullName}
+            helperText={formState.errors.fullName?.message}
+            fullWidth
+            {...register('fullName', { required: true })}
+          />
+          <TextField
+            label="Email address"
+            fullWidth
+            error={!!formState.errors.email}
+            helperText={formState.errors.email?.message}
+            {...register('email', { required: true })}
+          />
+          <PasswordTextField
+            label="Password"
+            fullWidth
+            error={!!formState.errors.password}
+            helperText={formState.errors.password?.message}
+            {...register('password', { required: true })}
+          />
+          <Button
+            disabled={loading}
+            type="submit"
+            size="large"
+            variant="contained"
+          >
+            Register
+          </Button>
+        </Stack>
       </form>
-    </div>
+      <Typography
+        variant="body2"
+        align="center"
+        sx={{ color: 'text.secondary', mt: 3 }}
+      >
+        By registering, I agree to the desko.io&nbsp;
+        <Link href="/terms">Terms of Service</Link>
+        &nbsp;and&nbsp;
+        <Link href="/privacy">Privacy Policy</Link>.
+      </Typography>
+    </AuthLayout>
   );
 }
 

@@ -4,7 +4,7 @@
   "main": "dist/index.js",
   "license": "MIT",
   "scripts": {
-    "dev": "nodemon --watch . --ext ts --exec \"ts-node -r tsconfig-paths/register src/index.ts\"",
+    "dev": "cross-env NODE_ENV=development nodemon --watch . --ext ts --exec \"ts-node -r tsconfig-paths/register src/index.ts\"",
     "build": "tsc --build",
     "clean": "tsc --build --clean",
     "ts:typeorm": "ts-node ../../node_modules/typeorm/cli.js",

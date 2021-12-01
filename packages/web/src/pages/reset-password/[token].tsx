@@ -1,8 +1,11 @@
+import { Button, Stack } from '@mui/material';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
+import AuthLayout from '../../components/AuthLayout';
 
 import ErrorList from '../../components/ErrorList';
+import PasswordTextField from '../../components/PasswordTextField';
 import { partitionErrors } from '../../lib/utils/partitionErrors';
 import withApollo from '../../lib/utils/withApollo';
 import {
@@ -14,13 +17,9 @@ import {
 function ResetPasswordPage() {
   const router = useRouter();
 
-  const [resetPassword] = useResetPasswordMutation();
-  const {
-    register,
-    handleSubmit,
-    setError,
-    formState: { errors },
-  } = useForm<ResetPasswordIn>();
+  const [resetPassword, { loading }] = useResetPasswordMutation();
+  const { register, handleSubmit, setError, formState } =
+    useForm<ResetPasswordIn>();
 
   const [genericErrors, setGenericErrors] = useState<UserError[]>([]);
 
@@ -51,14 +50,31 @@ function ResetPasswordPage() {
   };
 
   return (
-    <div>
+    <AuthLayout
+      mainHeading="Reset your password."
+      subHeading="Enter your new password below."
+    >
+      <ErrorList errors={genericErrors} />
       <form onSubmit={handleSubmit(onSubmit)}>
-        <ErrorList errors={genericErrors} />
-        <input {...register('password')} />
-        {errors.password?.message}
-        <button type="submit">reset password</button>
+        <Stack spacing={3}>
+          <PasswordTextField
+            label="New password"
+            fullWidth
+            error={!!formState.errors.password}
+            helperText={formState.errors.password?.message}
+            {...register('password', { required: true })}
+          />
+          <Button
+            disabled={loading}
+            type="submit"
+            size="large"
+            variant="contained"
+          >
+            Reset password
+          </Button>
+        </Stack>
       </form>
-    </div>
+    </AuthLayout>
   );
 }
 

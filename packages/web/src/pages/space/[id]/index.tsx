@@ -24,11 +24,11 @@ import {
 import { useQueryVar } from '../../../lib/utils/useQueryVar';
 import withApollo from '../../../lib/utils/withApollo';
 import getBaseUrl from '../../../lib/utils/getBaseUrl';
-import Navbar from '../../../components/Navbar';
 import withAuth from '../../../lib/utils/withAuth';
 import { MAX_DAY_EVENT_ROWS } from '../../../lib/constants';
 import ErrorList from '../../../components/ErrorList';
 import { isInPast } from '../../../lib/utils/isInPast';
+import DashboardLayout from 'packages/web/src/components/DashboardLayout';
 
 type Props = {
   prettyBaseUrl: string;
@@ -152,7 +152,7 @@ const SpacePage: NextPage<Props> = ({ prettyBaseUrl, rawBaseUrl }) => {
   };
 
   return (
-    <Navbar>
+    <DashboardLayout>
       {!spaceInfo.loading ? (
         !spaceInfo.error && spaceInfo.data ? (
           <div>
@@ -209,7 +209,7 @@ const SpacePage: NextPage<Props> = ({ prettyBaseUrl, rawBaseUrl }) => {
       ) : (
         <p>loading...</p>
       )}
-    </Navbar>
+    </DashboardLayout>
   );
 };
 

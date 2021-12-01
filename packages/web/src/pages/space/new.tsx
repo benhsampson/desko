@@ -1,9 +1,9 @@
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
+import DashboardLayout from '../../components/DashboardLayout';
 
 import ErrorList from '../../components/ErrorList';
-import Navbar from '../../components/Navbar';
 import { partitionErrors } from '../../lib/utils/partitionErrors';
 import withApollo from '../../lib/utils/withApollo';
 import withAuth from '../../lib/utils/withAuth';
@@ -50,7 +50,7 @@ const SpaceNewPage = () => {
   };
 
   return (
-    <Navbar>
+    <DashboardLayout>
       <h1>create new space</h1>
       <form onSubmit={handleSubmit(onSubmit)}>
         <ErrorList errors={genericErrors} />
@@ -68,7 +68,7 @@ const SpaceNewPage = () => {
         {errors.maxBookingsPerDay?.message}
         <button type="submit">create</button>
       </form>
-    </Navbar>
+    </DashboardLayout>
   );
 };
 
