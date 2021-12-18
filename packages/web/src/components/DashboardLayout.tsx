@@ -17,6 +17,8 @@ import {
 import NextLink from 'next/link';
 import HomeIcon from '@mui/icons-material/Home';
 import AddIcon from '@mui/icons-material/Add';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 
 import Logo from './Logo';
 import {
@@ -49,16 +51,14 @@ const ListItemButton = styled(MuiListItemButton, {
     : type === 'category'
     ? {
         boxShadow: `0 -1px 0 ${theme.palette.divider} inset`,
-        color: theme.palette.text.secondary,
+        fontWeight: 'bolder',
       }
     : type === 'item'
     ? {
         padding: theme.spacing(0.25, 2),
         color: theme.palette.text.secondary,
       }
-    : {
-        color: theme.palette.text.secondary,
-      }),
+    : {}),
 }));
 
 interface SharedSpace extends Partial<Space> {
@@ -68,7 +68,11 @@ interface SharedSpace extends Partial<Space> {
   code?: string;
 }
 
-const DashboardLayout: React.FC = ({ children }) => {
+type Props = {
+  cancelBorder?: boolean;
+};
+
+const DashboardLayout: React.FC<Props> = ({ children, cancelBorder }) => {
   const logout = useLogout();
   const spaceId = useQueryVar('id');
 
@@ -128,7 +132,10 @@ const DashboardLayout: React.FC = ({ children }) => {
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
-      <Box component="nav" sx={{ width: DRAWER_WIDTH }}>
+      <Box
+        component="nav"
+        sx={{ width: DRAWER_WIDTH, ...(cancelBorder && { mr: '-1px' }) }}
+      >
         <Drawer
           variant="permanent"
           PaperProps={{ sx: { width: DRAWER_WIDTH } }}
@@ -154,7 +161,9 @@ const DashboardLayout: React.FC = ({ children }) => {
             </Box>
             <Box sx={{ flexGrow: 1 }}>
               <ListItem>
-                {isManager ? 'Managed' : 'Joined'}&nbsp;spaces
+                <ListItemText>
+                  {isManager ? 'Managed' : 'Joined'}&nbsp;spaces
+                </ListItemText>
               </ListItem>
               {spaces.map((s) => (
                 <NextLink key={s.id} href={`/space/${s.id}`}>
@@ -214,6 +223,11 @@ const DashboardLayout: React.FC = ({ children }) => {
                       <ListItemText>
                         {_userInfo.data.userInfo.fullName}
                       </ListItemText>
+                      {accountMenuAnchorEl ? (
+                        <ExpandLessIcon />
+                      ) : (
+                        <ExpandMoreIcon />
+                      )}
                     </ListItemButton>
                   </>
                 ) : (

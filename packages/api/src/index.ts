@@ -21,7 +21,6 @@ import connectionOptions from './ormconfig';
 const PORT = parseInt(process.env.API_PORT || DEFAULT_PORT, 10);
 
 (async () => {
-  console.log(connectionOptions);
   await createConnection(connectionOptions);
   const app = express();
   app.use(
@@ -30,7 +29,6 @@ const PORT = parseInt(process.env.API_PORT || DEFAULT_PORT, 10);
       credentials: true,
     })
   );
-  console.log(process.env.REDIS_URL);
   const redis = new Redis(process.env.REDIS_URL);
   const schema = await buildSchema({
     resolvers: [StatusResolver, UserResolver, SpaceResolver, BookingResolver],

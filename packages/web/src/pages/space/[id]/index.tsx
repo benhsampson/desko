@@ -1,17 +1,18 @@
 import { NextPage } from 'next';
-import Link from 'next/link';
 import { useCallback, useMemo, useState } from 'react';
-import { CopyToClipboard } from 'react-copy-to-clipboard';
+import { Box, IconButton } from '@mui/material';
 import FullCalendar from '@fullcalendar/react';
 import interactionPlugin from '@fullcalendar/interaction';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import {
   EventInput,
   DateSelectArg,
-  EventClickArg,
   EventContentArg,
   DayCellContentArg,
+  EventApi,
 } from '@fullcalendar/common';
+import { useRouter } from 'next/router';
+import CloseIcon from '@mui/icons-material/Close';
 
 import {
   useBookMutation,
@@ -29,13 +30,17 @@ import { MAX_DAY_EVENT_ROWS } from '../../../lib/constants';
 import ErrorList from '../../../components/ErrorList';
 import { isInPast } from '../../../lib/utils/isInPast';
 import DashboardLayout from 'packages/web/src/components/DashboardLayout';
+import Loader from 'packages/web/src/components/Loader';
+import ErrorDisplay from 'packages/web/src/components/ErrorDisplay';
+import useCopyToClipboard from 'packages/web/src/lib/utils/useCopyToClipboard';
 
 type Props = {
   prettyBaseUrl: string;
   rawBaseUrl: string;
 };
 
-const SpacePage: NextPage<Props> = ({ prettyBaseUrl, rawBaseUrl }) => {
+const SpacePage: NextPage<Props> = ({ rawBaseUrl }) => {
+  const router = useRouter();
   const spaceId = useQueryVar('id') || '404';
 
   const [globalErrors, setGlobalErrors] = useState<UserError[]>([]);
@@ -121,93 +126,141 @@ const SpacePage: NextPage<Props> = ({ prettyBaseUrl, rawBaseUrl }) => {
     [book, canInteract, spaceId]
   );
 
-  const handleEventClick = useCallback(
-    async (clickInfo: EventClickArg) => {
+  const handleCancelClick = useCallback(
+    async (event: EventApi) => {
       if (!canInteract) return;
 
-      if (
-        clickInfo.event.extendedProps.isBackground ||
-        !clickInfo.event.extendedProps.canCancel
-      )
+      if (event.extendedProps.isBackground || !event.extendedProps.canCancel)
         return;
 
       await cancelBooking({
-        variables: { bookingId: clickInfo.event.id },
+        variables: { bookingId: event.id },
       });
     },
     [cancelBooking, canInteract]
   );
 
   const renderEventContent = (eventContent: EventContentArg) => (
-    <div>
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        height: '24px',
+        px: 0.5,
+      }}
+    >
       <span>{eventContent.event.title}</span>
       {eventContent.event._def.extendedProps.canCancel && (
-        <button>cancel</button>
+        <IconButton
+          onClick={() => handleCancelClick(eventContent.event)}
+          size="small"
+          sx={{ color: 'primary.contrastText', p: 0.25 }}
+        >
+          <CloseIcon sx={{ width: '16px', height: '16px' }} />
+        </IconButton>
       )}
-    </div>
+    </Box>
   );
 
   const renderDayCellContent = ({ dayNumberText }: DayCellContentArg) => {
     return <div>{dayNumberText}</div>;
   };
 
+  const [, copyLink] = useCopyToClipboard();
+
+  const isManager = userInfo.data?.userInfo.roles[0].value === 'MANAGER';
+
   return (
-    <DashboardLayout>
+    <DashboardLayout cancelBorder>
       {!spaceInfo.loading ? (
         !spaceInfo.error && spaceInfo.data ? (
-          <div>
-            <h1>{spaceInfo.data.spaceInfo.name}</h1>
-            <p>
-              max bookings per day: {spaceInfo.data.spaceInfo.maxBookingsPerDay}
-            </p>
-            {!userInfo.loading ? (
-              !userInfo.error && userInfo.data ? (
-                userInfo.data.userInfo.roles[0].value === 'MANAGER' ? (
-                  <div>
-                    <CopyToClipboard
-                      text={`${rawBaseUrl}/invite/${spaceInfo.data.spaceInfo.code}`}
-                    >
-                      <button>{`${prettyBaseUrl}/invite/${spaceInfo.data.spaceInfo.code}`}</button>
-                    </CopyToClipboard>
-                    <Link href={`/space/${spaceId}/edit`}>Edit</Link>
-                  </div>
-                ) : null
-              ) : (
-                <p>{userInfo.error?.message}</p>
-              )
-            ) : (
-              <p>loading...</p>
-            )}
+          <>
             <ErrorList errors={globalErrors} />
             {!getBookings.loading ? (
               !getBookings.error && getBookings.data ? (
-                <div>
+                <Box
+                  sx={{
+                    '& .fc-header-toolbar': {
+                      py: (theme) => theme.spacing(2),
+                      pl: (theme) => `calc(${theme.spacing(2)} + 1px)`,
+                      pr: (theme) => theme.spacing(2),
+                      mb: '0 !important',
+                    },
+                    '& .fc-spaceName-button, .fc-spaceMaxBookings-button': {
+                      color: 'inherit !important',
+                      backgroundColor: 'inherit !important',
+                      border: 'none !important',
+                      boxShadow: 'none !important',
+                      cursor: 'default !important',
+                    },
+                    '& .fc-spaceName-button': {
+                      fontWeight: '500 !important',
+                    },
+                  }}
+                >
                   <FullCalendar
                     plugins={[interactionPlugin, dayGridPlugin]}
                     events={events}
                     selectable={canInteract}
                     select={handleDateSelect}
-                    eventClick={handleEventClick}
+                    // eventClick={handleEventClick}
                     eventContent={renderEventContent}
                     dayCellContent={renderDayCellContent}
                     selectAllow={({ start }) => !isInPast(start)}
                     selectOverlap={(event) => !!event.extendedProps.isAvailable}
                     dayMaxEventRows={MAX_DAY_EVENT_ROWS}
+                    customButtons={{
+                      spaceName: {
+                        text: spaceInfo.data.spaceInfo.name,
+                      },
+                      spaceMaxBookings: {
+                        text: `Max bookings per day: ${spaceInfo.data.spaceInfo.maxBookingsPerDay}`,
+                      },
+                      copy: {
+                        text: `Copy link: desko.io/invite/${spaceInfo.data.spaceInfo.code}`,
+                        click: () => {
+                          copyLink(
+                            `${rawBaseUrl}/invite/${
+                              spaceInfo.data?.spaceInfo.code || ''
+                            }`
+                          ).catch((err) => {
+                            throw err;
+                          });
+                          alert('Copied!');
+                        },
+                      },
+                      edit: {
+                        text: 'Edit',
+                        click: () => router.push(`/space/${spaceId}/edit`),
+                      },
+                    }}
+                    buttonText={{
+                      today: 'This month',
+                    }}
+                    headerToolbar={{
+                      start: 'title',
+                      end: `spaceName,spaceMaxBookings${
+                        isManager ? ' edit copy ' : ' '
+                      }today prev,next`,
+                    }}
+                    height="100vh"
+                    fixedWeekCount={false}
                     defaultAllDay
                   />
-                </div>
+                </Box>
               ) : (
-                <p>{getBookings.error?.message}</p>
+                <ErrorDisplay error={getBookings.error} />
               )
             ) : (
-              <p>loading..</p>
+              <Loader />
             )}
-          </div>
+          </>
         ) : (
-          <p>{spaceInfo.error?.message}</p>
+          <ErrorDisplay error={spaceInfo.error} />
         )
       ) : (
-        <p>loading...</p>
+        <Loader />
       )}
     </DashboardLayout>
   );

@@ -1,7 +1,10 @@
 {
   "extends": "./base.tsconfig.json",
   "compilerOptions": {
-    "rootDir": "."
+    "rootDir": ".",
+    "paths": {
+      "@desko/calendar": ["packages/calendar"]
+    }
   },
   "include": ["packages/*"]
 }

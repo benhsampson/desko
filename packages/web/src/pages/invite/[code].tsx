@@ -6,7 +6,6 @@ import { useAccessToken } from '../../lib/utils/useAccessToken';
 import { useQueryVar } from '../../lib/utils/useQueryVar';
 import withApollo from '../../lib/utils/withApollo';
 import { useJoinSpaceMutation, UserError } from '../../__generated__/graphql';
-import AccessTokenView from '../../components/AccessTokenView';
 import ErrorList from '../../components/ErrorList';
 
 const InvitePage = () => {
@@ -53,7 +52,6 @@ const InvitePage = () => {
 
   return (
     <div>
-      <AccessTokenView accessToken={accessToken} />
       <ErrorList errors={stateErrors} />
       <p>joining...</p>
     </div>
