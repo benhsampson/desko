@@ -3,25 +3,25 @@ import moment from 'moment';
 import { RootState } from '../../store';
 
 export interface CalendarState {
-  date: Date | null;
+  date: string | null;
 }
 
 const initialState: CalendarState = {
-  date: null,
+  date: new Date().toISOString(),
 };
 
 export const calendarSlice = createSlice({
   name: 'calendar',
   initialState,
   reducers: {
-    setDate: (state, action: PayloadAction<Date | null>) => {
+    setDate: (state, action: PayloadAction<string | null>) => {
       state.date = action.payload;
     },
     incrementMonth: (state) => {
-      state.date = moment(state.date).add(1, 'M').toDate();
+      state.date = moment(state.date).add(1, 'M').toISOString();
     },
     decrementMonth: (state) => {
-      state.date = moment(state.date).subtract(1, 'M').toDate();
+      state.date = moment(state.date).subtract(1, 'M').toISOString();
     },
   },
 });

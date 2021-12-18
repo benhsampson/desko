@@ -11,6 +11,8 @@ import {
   TableBody,
   styled,
 } from '@mui/material';
+import { useSelector } from 'react-redux';
+import { selectDate } from '../lib/features/calendar/calendarSlice';
 
 class Slot {
   constructor(content: string, isCurrentMonth: boolean) {
@@ -51,18 +53,21 @@ const DayNumber = styled(Box)(({ theme }) => ({
   padding: theme.spacing(0.5, 0),
 }));
 
-export default function MonthView() {
+export default function CalendarMonthView() {
   const WEEKDAYS = moment.weekdaysShort();
+
+  const date = useSelector(selectDate);
+
   const momentPreviousMonth = moment(date).subtract(1, 'M');
   const momentNow = moment(date);
   const momentNextMonth = moment(date).add(1, 'M');
 
-  const DAYS_IN_THIS_MONTH = momentNow.daysInMonth();
-  const FIRST_DAY_OF_THIS_MONTH = parseInt(
+  const numberOfDaysThisMonth = momentNow.daysInMonth();
+  const firstDayOfThisMonth = parseInt(
     momentNow.startOf('month').format('d'),
     10
   );
-  const LAST_DAY_OF_PREVIOUS_MONTH = parseInt(
+  const lastDayOfPreviousMonth = parseInt(
     momentPreviousMonth.endOf('month').format('D'),
     10
   );
@@ -71,12 +76,12 @@ export default function MonthView() {
 
   useEffect(() => {
     const previous = Array.from(
-      { length: FIRST_DAY_OF_THIS_MONTH },
-      (_, i) => new Slot(`${LAST_DAY_OF_PREVIOUS_MONTH - i}`, false)
+      { length: firstDayOfThisMonth },
+      (_, i) => new Slot(`${lastDayOfPreviousMonth - i}`, false)
     ).reverse();
     const days = [
       ...Array.from(
-        { length: DAYS_IN_THIS_MONTH },
+        { length: numberOfDaysThisMonth },
         (_, i) =>
           new Slot(i === 0 ? `${momentNow.format('MMM')} 1` : `${i + 1}`, true)
       ),
@@ -89,7 +94,7 @@ export default function MonthView() {
           : rows[rows.push([]) - 1];
       lastRow.push(slot);
       if (index === slots.length - 1) {
-        const future = Array.from(
+        const next = Array.from(
           { length: 7 - lastRow.length },
           (_, i) =>
             new Slot(
@@ -97,7 +102,7 @@ export default function MonthView() {
               false
             )
         );
-        lastRow.push(...future);
+        lastRow.push(...next);
       }
       rows[rows.length - 1] = lastRow;
       return rows;
