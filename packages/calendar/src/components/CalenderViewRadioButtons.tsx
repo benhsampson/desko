@@ -1,24 +1,34 @@
-import { selectView, setView, View } from '../lib/features/view/viewSlice';
+import { Button, ButtonGroup, styled } from '@mui/material';
+import { selectView, setView } from '../lib/features/view/viewSlice';
 import { useAppDispatch, useAppSelector } from '../lib/hooks';
 
-type Props = {
-  children: (props: {
-    view: View;
-    setView: (newView: View) => void;
-  }) => React.ReactNode;
-};
+const RadioButton = styled(Button, {
+  shouldForwardProp: (prop) => prop !== 'selected',
+})<{ selected?: boolean }>(({ selected }) => ({
+  ...(selected && {
+    background: 'rgba(0,0,0,0.05)',
+  }),
+}));
 
-const CalendarViewRadioButtons = ({ children }: Props) => {
+const CalendarViewRadioButtons = () => {
   const view = useAppSelector(selectView);
   const dispatch = useAppDispatch();
   return (
     <>
-      {children({
-        view,
-        setView: (newView) => {
-          dispatch(setView(newView));
-        },
-      })}
+      <ButtonGroup variant="outlined">
+        <RadioButton
+          selected={view === 'DAY'}
+          onClick={() => dispatch(setView('DAY'))}
+        >
+          Day
+        </RadioButton>
+        <RadioButton
+          selected={view === 'MONTH'}
+          onClick={() => dispatch(setView('MONTH'))}
+        >
+          Month
+        </RadioButton>
+      </ButtonGroup>
     </>
   );
 };

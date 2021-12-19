@@ -23,11 +23,22 @@ export const calendarSlice = createSlice({
     decrementMonth: (state) => {
       state.date = moment(state.date).subtract(1, 'M').toISOString();
     },
+    incrementDay: (state) => {
+      state.date = moment(state.date).add(1, 'd').toISOString();
+    },
+    decrementDay: (state) => {
+      state.date = moment(state.date).subtract(1, 'd').toISOString();
+    },
   },
 });
 
-export const { setDate, incrementMonth, decrementMonth } =
-  calendarSlice.actions;
+export const {
+  setDate,
+  incrementMonth,
+  decrementMonth,
+  incrementDay,
+  decrementDay,
+} = calendarSlice.actions;
 export const selectDate = (state: RootState) => state.calendar.date;
 
 export default calendarSlice.reducer;

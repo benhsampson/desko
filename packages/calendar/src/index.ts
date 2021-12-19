@@ -1,4 +1,4 @@
-export * as CalendarContainer from './components/CalendarContainer';
-export * as CalendarViewRadioButtons from './components/CalenderViewRadioButtons';
-export * as CalendarDateActions from './components/CalendarDateActions';
-export * as CalendarMonthView from './components/CalendarMonthView';
+export { default as CalendarContainer } from './components/CalendarContainer';
+export { default as CalendarViewRadioButtons } from './components/CalenderViewRadioButtons';
+export { default as CalendarDateActions } from './components/CalendarDateActions';
+export { default as CalendarView } from './components/CalendarView';
