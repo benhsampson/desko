@@ -4,17 +4,19 @@ import {
   Box,
   TableContainer,
   Table as MuiTable,
-  TableHead,
-  TableRow,
+  TableHead as MuiTableHead,
+  TableBody as MuiTableBody,
+  TableRow as MuiTableRow,
   TableCell as MuiTableCell,
   TableCellProps as MuiTableCellProps,
-  TableBody,
   styled,
 } from '@mui/material';
 import { useSelector } from 'react-redux';
-import { selectDate } from '../lib/features/calendar/calendarSlice';
-import CalendarEventList, { CalendarEvent } from './CalendarEventList';
-import { CalendarViewProps } from './CalendarView';
+
+import { selectDate, setRange } from '../lib/features/calendar/calendarSlice';
+import CalendarEventList from './CalendarEventList';
+import { useAppDispatch } from '../lib/hooks';
+import { CalendarEvent } from '../lib/types/CalendarEvent';
 import formatAsTimestamp from '../lib/utils/formatAsTimestamp';
 
 class Slot {
@@ -33,18 +35,39 @@ class Slot {
   events!: CalendarEvent[];
 }
 
+const TABLE_HEAD_HEIGHT = 33;
+
 const Table = styled(MuiTable)(() => ({
-  tableLayout: 'fixed',
+  display: 'flex',
+  flexDirection: 'column',
+  tableLayout: 'unset',
 }));
 
 interface TableCellProps extends MuiTableCellProps {
   isWashed?: boolean;
 }
 
+const TableHead = styled(MuiTableHead)({
+  display: 'block',
+});
+
+const TableBody = styled(MuiTableBody, {
+  shouldForwardProp: (prop) => prop !== 'rows',
+})<{ rows: number }>(({ rows }) => ({
+  display: 'grid',
+  gridTemplateRows: `repeat(${rows}, 1fr)`,
+  flexGrow: 1,
+}));
+
+const TableRow = styled(MuiTableRow)({
+  display: 'grid',
+  gridTemplateColumns: 'repeat(7, 1fr)',
+});
+
 const TableCell = styled(MuiTableCell, {
   shouldForwardProp: (prop) => prop !== 'isWashed',
 })<TableCellProps>(({ theme, isWashed }) => ({
-  width: `${100 / 7}%`,
+  display: 'block',
   backgroundColor: isWashed
     ? `rgba(0,0,0,0.05)`
     : theme.palette.background.paper,
@@ -59,7 +82,7 @@ const TableCell = styled(MuiTableCell, {
 
 const DayNumber = styled(Box)(({ theme }) => ({
   fontFamily: 'monospace',
-  padding: theme.spacing(0.5, 0, 0),
+  padding: theme.spacing(0.5, 0),
 }));
 
 const smallestNumberGreaterThanOrEqualToNDivisibleByK = (
@@ -75,87 +98,93 @@ const smallestNumberGreaterThanOrEqualToNDivisibleByK = (
   }
 };
 
-export default function CalendarMonthView({ eventSlots }: CalendarViewProps) {
+export default function CalendarMonthView() {
   const WEEKDAYS = moment.weekdaysShort();
 
+  const dispatch = useAppDispatch();
   const date = useSelector(selectDate);
 
   const [rows, setRows] = useState<Slot[][]>([]);
 
   useEffect(() => {
-    const momentPreviousMonth = moment(date).subtract(1, 'M');
-    const momentNow = moment(date);
-    const momentNextMonth = moment(date).add(1, 'M');
-    const numberOfDaysThisMonth = momentNow.daysInMonth();
-    const firstDayOfThisMonth = parseInt(
-      momentNow.startOf('month').format('d'),
-      10
-    );
-    const lastDayOfPreviousMonth = parseInt(
-      momentPreviousMonth.endOf('month').format('D'),
-      10
-    );
-
-    const prevCount = firstDayOfThisMonth;
-
-    const start = prevCount === 0 ? momentNow : momentPreviousMonth;
-    const sY = start.year();
-    const sM = start.month();
-    const sD =
-      (prevCount === 0 ? 0 : lastDayOfPreviousMonth - firstDayOfThisMonth) + 1;
-    const startTimestamp = formatAsTimestamp(sY, sM, sD);
-
-    const n = prevCount + numberOfDaysThisMonth;
-    const nextCount = smallestNumberGreaterThanOrEqualToNDivisibleByK(n, 7) - n;
-
-    const end = nextCount === 0 ? momentNow : momentNextMonth;
-    const eY = end.year();
-    const eM = end.month();
-    const eD = nextCount === 0 ? numberOfDaysThisMonth : nextCount;
-    const endTimestamp = formatAsTimestamp(eY, eM, eD);
-
-    console.log(startTimestamp, endTimestamp);
-
-    const prevM = Array.from({ length: prevCount }, (_, i) => {
-      const d = sD + i;
-      return new Slot(`${d}`, false, []);
-    });
-    const thisM = Array.from({ length: numberOfDaysThisMonth }, (_, i) => {
-      const d = i + 1;
-      return new Slot(
-        d === 1 ? `${momentNow.format('MMM')} 1` : `${d}`,
-        true,
-        []
+    void (function run() {
+      const momentPreviousMonth = moment(date).subtract(1, 'M');
+      const momentNow = moment(date);
+      const momentNextMonth = moment(date).add(1, 'M');
+      const numberOfDaysThisMonth = momentNow.daysInMonth();
+      const firstDayOfThisMonth = parseInt(
+        momentNow.startOf('month').format('d'),
+        10
       );
-    });
-    const nextM = Array.from({ length: nextCount }, (_, i) => {
-      const d = i + 1;
-      return new Slot(
-        d === 1 ? `${momentNextMonth.format('MMM')} 1` : `${d}`,
-        false,
-        []
+      const lastDayOfPreviousMonth = parseInt(
+        momentPreviousMonth.endOf('month').format('D'),
+        10
       );
-    });
 
-    const slots = [...prevM, ...thisM, ...nextM];
-    const _rows = slots.reduce((rows, slot, index) => {
-      const lastRow =
-        rows.length > 0 && index % 7 !== 0
-          ? rows[rows.length - 1]
-          : rows[rows.push([]) - 1];
-      lastRow.push(slot);
-      rows[rows.length - 1] = lastRow;
-      return rows;
-    }, [] as Slot[][]);
+      const prevCount = firstDayOfThisMonth;
 
-    setRows(_rows);
+      const start = prevCount === 0 ? momentNow : momentPreviousMonth;
+      const sY = start.year();
+      const sM = start.month();
+      const sD =
+        (prevCount === 0 ? 0 : lastDayOfPreviousMonth - firstDayOfThisMonth) +
+        1;
+      const startTimestamp = formatAsTimestamp(sY, sM, sD);
+
+      const n = prevCount + numberOfDaysThisMonth;
+      const nextCount =
+        smallestNumberGreaterThanOrEqualToNDivisibleByK(n, 7) - n;
+
+      const end = nextCount === 0 ? momentNow : momentNextMonth;
+      const eY = end.year();
+      const eM = end.month();
+      const eD = nextCount === 0 ? numberOfDaysThisMonth : nextCount;
+      const endTimestamp = formatAsTimestamp(eY, eM, eD);
+
+      dispatch(setRange({ start: startTimestamp, end: endTimestamp }));
+
+      const prevM = Array.from({ length: prevCount }, (_, i) => {
+        const d = sD + i;
+        return new Slot(`${d}`, false, []);
+      });
+      const thisM = Array.from({ length: numberOfDaysThisMonth }, (_, i) => {
+        const d = i + 1;
+        // const ts = momentNow.set('D', d).format(TIMESTAMP_FORMAT);
+        return new Slot(
+          d === 1 ? `${momentNow.format('MMM')} 1` : `${d}`,
+          true,
+          []
+        );
+      });
+      const nextM = Array.from({ length: nextCount }, (_, i) => {
+        const d = i + 1;
+        return new Slot(
+          d === 1 ? `${momentNextMonth.format('MMM')} 1` : `${d}`,
+          false,
+          []
+        );
+      });
+
+      const slots = [...prevM, ...thisM, ...nextM];
+      const _rows = slots.reduce((rows, slot, index) => {
+        const lastRow =
+          rows.length > 0 && index % 7 !== 0
+            ? rows[rows.length - 1]
+            : rows[rows.push([]) - 1];
+        lastRow.push(slot);
+        rows[rows.length - 1] = lastRow;
+        return rows;
+      }, [] as Slot[][]);
+
+      setRows(_rows);
+    })();
   }, [date]);
 
   const slotRenderer = (slot: Slot, index: number) => {
     return (
       <TableCell key={`Slot${index}`} isWashed={!slot.isCurrentMonth}>
         <DayNumber>{slot.content}</DayNumber>
-        {slot.events && <CalendarEventList events={slot.events} />}
+        {slot.events && <CalendarEventList events={slot.events} maxRows={4} />}
       </TableCell>
     );
   };
@@ -163,14 +192,14 @@ export default function CalendarMonthView({ eventSlots }: CalendarViewProps) {
   return (
     <TableContainer sx={{ display: 'flex', flexGrow: 1 }}>
       <Table stickyHeader>
-        <TableHead>
+        <TableHead sx={{ height: TABLE_HEAD_HEIGHT }}>
           <TableRow>
             {WEEKDAYS.map((day) => (
               <TableCell key={day}>{day}</TableCell>
             ))}
           </TableRow>
         </TableHead>
-        <TableBody>
+        <TableBody rows={rows.length}>
           {rows.map((slots, ri) => (
             <TableRow key={`Row${ri}`}>
               {slots.map((slot, si) => slotRenderer(slot, si))}

@@ -18,7 +18,11 @@ import {
 } from '../lib/features/calendar/calendarSlice';
 import { useAppDispatch, useAppSelector } from '../lib/hooks';
 
-const CalendarDateActions = () => {
+type Props = {
+  isDisabled?: boolean;
+};
+
+const CalendarDateActions = ({ isDisabled }: Props) => {
   const view = useAppSelector(selectView);
   const date = useAppSelector(selectDate);
   const dispatch = useAppDispatch();
@@ -101,7 +105,7 @@ const CalendarDateActions = () => {
 
   return (
     <>
-      <ButtonGroup aria-label="prev next button group">
+      <ButtonGroup aria-label="prev next button group" disabled={isDisabled}>
         <Button onClick={handlePreviousClick} startIcon={<ArrowBackIcon />}>
           Back
         </Button>

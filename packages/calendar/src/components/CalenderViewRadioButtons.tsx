@@ -10,12 +10,16 @@ const RadioButton = styled(Button, {
   }),
 }));
 
-const CalendarViewRadioButtons = () => {
+type Props = {
+  isDisabled?: boolean;
+};
+
+const CalendarViewRadioButtons = ({ isDisabled }: Props) => {
   const view = useAppSelector(selectView);
   const dispatch = useAppDispatch();
   return (
     <>
-      <ButtonGroup variant="outlined">
+      <ButtonGroup variant="outlined" disabled={isDisabled}>
         <RadioButton
           selected={view === 'DAY'}
           onClick={() => dispatch(setView('DAY'))}

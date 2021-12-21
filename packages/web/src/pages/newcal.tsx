@@ -6,9 +6,17 @@ import {
   CalendarView,
 } from '@desko/calendar';
 
-export default function NewCal() {
+import { useDummyEvents } from '../lib/dummy';
+
+function NewCal() {
+  const { loading, data, refetch } = useDummyEvents();
   return (
-    <CalendarContainer>
+    <CalendarContainer
+      onDateChange={(start, end) => {
+        console.log(start, end);
+        void refetch();
+      }}
+    >
       <Box
         sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}
       >
@@ -20,24 +28,15 @@ export default function NewCal() {
         >
           <Toolbar>
             <Stack direction="row" spacing={2}>
-              <CalendarViewRadioButtons />
-              <CalendarDateActions />
+              <CalendarViewRadioButtons isDisabled={loading} />
+              <CalendarDateActions isDisabled={loading} />
             </Stack>
           </Toolbar>
         </AppBar>
-        <CalendarView
-          events={[
-            {
-              timestamp: '2021-12-20',
-              events: [
-                {
-                  name: 'something',
-                },
-              ],
-            },
-          ]}
-        />
+        <CalendarView eventSlots={data} />
       </Box>
     </CalendarContainer>
   );
 }
+
+export default NewCal;
