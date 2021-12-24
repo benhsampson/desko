@@ -1,0 +1,28 @@
+query SpaceData($spaceId: String!, $start: String!, $end: String!) {
+  userInfo {
+    id
+    fullName
+    email
+    roles {
+      value
+    }
+  }
+  spaceInfo(spaceId: $spaceId) {
+    id
+    name
+    maxBookingsPerDay
+    code
+  }
+  getBookings(spaceId: $spaceId, input: { start: $start, end: $end }) {
+    date
+    isAvailable
+    bookings {
+      id
+      date
+      canCancel
+      user {
+        fullName
+      }
+    }
+  }
+}

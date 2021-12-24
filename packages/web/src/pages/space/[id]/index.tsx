@@ -1,274 +1,175 @@
 import { NextPage } from 'next';
-import { useCallback, useMemo, useState } from 'react';
-import { Box, IconButton } from '@mui/material';
-import FullCalendar from '@fullcalendar/react';
-import interactionPlugin from '@fullcalendar/interaction';
-import dayGridPlugin from '@fullcalendar/daygrid';
 import {
-  EventInput,
-  DateSelectArg,
-  EventContentArg,
-  DayCellContentArg,
-  EventApi,
-} from '@fullcalendar/common';
-import { useRouter } from 'next/router';
-import CloseIcon from '@mui/icons-material/Close';
+  AppBar,
+  Box,
+  IconButton,
+  InputAdornment,
+  Stack,
+  StackProps,
+  TextField,
+  Toolbar,
+} from '@mui/material';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import {
+  CalendarContainer,
+  CalendarDateActions,
+  CalendarView,
+  CalendarViewRadioButtons,
+} from '@desko/calendar';
 
+import getBaseUrl from '../../../lib/utils/getBaseUrl';
+import getCtxQueryVar from '../../../lib/utils/getCtxQueryVar';
+import withApollo from '../../../lib/utils/withApollo';
+import withAuth from '../../../lib/utils/withAuth';
 import {
+  GetBookingsQuery,
+  useSpaceDataQuery,
   useBookMutation,
   useCancelBookingMutation,
-  useGetBookingsQuery,
-  UserError,
-  useSpaceInfoQuery,
-  useUserInfoQuery,
 } from '../../../__generated__/graphql';
-import { useQueryVar } from '../../../lib/utils/useQueryVar';
-import withApollo from '../../../lib/utils/withApollo';
-import getBaseUrl from '../../../lib/utils/getBaseUrl';
-import withAuth from '../../../lib/utils/withAuth';
-import { MAX_DAY_EVENT_ROWS } from '../../../lib/constants';
-import ErrorList from '../../../components/ErrorList';
-import { isInPast } from '../../../lib/utils/isInPast';
-import DashboardLayout from 'packages/web/src/components/DashboardLayout';
-import Loader from 'packages/web/src/components/Loader';
-import ErrorDisplay from 'packages/web/src/components/ErrorDisplay';
+import DashboardLayout from '../../../components/DashboardLayout';
+import ErrorDisplay from '../../../components/ErrorDisplay';
+import Loader from '../../../components/Loader';
 import useCopyToClipboard from 'packages/web/src/lib/utils/useCopyToClipboard';
+import { useRef } from 'react';
+import { useEffect } from 'react';
 
 type Props = {
-  prettyBaseUrl: string;
-  rawBaseUrl: string;
+  url: string;
+  prettyUrl: string;
+  spaceId: string;
 };
 
-const SpacePage: NextPage<Props> = ({ rawBaseUrl }) => {
-  const router = useRouter();
-  const spaceId = useQueryVar('id') || '404';
-
-  const [globalErrors, setGlobalErrors] = useState<UserError[]>([]);
-
-  const userInfo = useUserInfoQuery();
-  const spaceInfo = useSpaceInfoQuery({
-    variables: { spaceId },
-  });
-  const getBookings = useGetBookingsQuery({
-    variables: { spaceId },
-    fetchPolicy: 'no-cache',
+const SpacePage: NextPage<Props> = ({ url, prettyUrl, spaceId }) => {
+  const prevStart = useRef<string>('');
+  const prevEnd = useRef<string>('');
+  const { error, loading, data, refetch } = useSpaceDataQuery({
+    variables: { spaceId, start: '', end: '' },
   });
   const [book] = useBookMutation({
-    refetchQueries: ['GetBookings'],
+    refetchQueries: ['SpaceData'],
   });
   const [cancelBooking] = useCancelBookingMutation({
-    refetchQueries: ['GetBookings'],
+    refetchQueries: ['SpaceData'],
   });
 
-  const canInteract = !!userInfo.data?.userInfo.roles.some(
-    (role) => role.value === 'USER'
+  useEffect(() => {
+    void refetch({ spaceId, start: prevStart.current, end: prevEnd.current });
+  }, [spaceId, refetch]);
+
+  const bookingSlotToEventSlot = (
+    slot: GetBookingsQuery['getBookings'][number]
+  ) => ({
+    date: slot.date,
+    events: slot.bookings.map((b) => ({
+      id: b.id,
+      name: b.user.fullName,
+      canDelete: b.canCancel ?? false,
+    })),
+    canCreate: slot.isAvailable ?? undefined,
+  });
+
+  const ToolbarItem = ({ ...toolbarItemProps }: StackProps) => (
+    <Stack direction="row" spacing={2} {...toolbarItemProps} />
   );
 
-  const events = useMemo(() => {
-    const _events: EventInput[] = [];
+  const isManager = data?.userInfo.roles[0].value === 'MANAGER';
+  const isUser = data?.userInfo.roles[0].value === 'USER';
 
-    getBookings.data?.getBookings.forEach((slot) => {
-      const dateStr = slot.date as string;
-      const startDate = new Date(dateStr);
-
-      if (!slot.isAvailable && !isInPast(startDate)) {
-        _events.push({
-          id: dateStr,
-          display: 'background',
-          start: startDate,
-          backgroundColor: 'lightgrey',
-          extendedProps: {
-            isBackground: true,
-          },
-        });
-      }
-
-      slot.bookings.forEach((booking) =>
-        _events.push({
-          id: booking.id,
-          title: booking.user.fullName,
-          start: startDate,
-          extendedProps: {
-            isAvailable: !!slot.isAvailable,
-            canCancel: !!booking.canCancel,
-          },
-        })
-      );
-    });
-
-    return _events;
-  }, [getBookings.data?.getBookings]);
-
-  const handleDateSelect = useCallback(
-    async (selectInfo: DateSelectArg) => {
-      console.log(selectInfo);
-
-      if (!canInteract) return;
-
-      const calendarApi = selectInfo.view.calendar;
-      calendarApi.unselect();
-
-      const { errors, data } = await book({
-        variables: {
-          spaceId,
-          year: selectInfo.start.getFullYear(),
-          month: selectInfo.start.getMonth(),
-          day: selectInfo.start.getDate(),
-        },
-      });
-
-      if (errors) return console.error(errors);
-
-      if (data?.book.errors) return setGlobalErrors(data.book.errors);
-
-      setGlobalErrors([]);
-    },
-    [book, canInteract, spaceId]
-  );
-
-  const handleCancelClick = useCallback(
-    async (event: EventApi) => {
-      if (!canInteract) return;
-
-      if (event.extendedProps.isBackground || !event.extendedProps.canCancel)
-        return;
-
-      await cancelBooking({
-        variables: { bookingId: event.id },
-      });
-    },
-    [cancelBooking, canInteract]
-  );
-
-  const renderEventContent = (eventContent: EventContentArg) => (
-    <Box
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        height: '24px',
-        px: 0.5,
-      }}
-    >
-      <span>{eventContent.event.title}</span>
-      {eventContent.event._def.extendedProps.canCancel && (
-        <IconButton
-          onClick={() => handleCancelClick(eventContent.event)}
-          size="small"
-          sx={{ color: 'primary.contrastText', p: 0.25 }}
-        >
-          <CloseIcon sx={{ width: '16px', height: '16px' }} />
-        </IconButton>
-      )}
-    </Box>
-  );
-
-  const renderDayCellContent = ({ dayNumberText }: DayCellContentArg) => {
-    return <div>{dayNumberText}</div>;
-  };
-
-  const [, copyLink] = useCopyToClipboard();
-
-  const isManager = userInfo.data?.userInfo.roles[0].value === 'MANAGER';
+  const [, copy] = useCopyToClipboard();
+  const linkText = `${prettyUrl}/invite/${data?.spaceInfo.code || ''}`;
 
   return (
     <DashboardLayout cancelBorder>
-      {!spaceInfo.loading ? (
-        !spaceInfo.error && spaceInfo.data ? (
-          <>
-            <ErrorList errors={globalErrors} />
-            {!getBookings.loading ? (
-              !getBookings.error && getBookings.data ? (
-                <Box
-                  sx={{
-                    '& .fc-header-toolbar': {
-                      py: (theme) => theme.spacing(2),
-                      pl: (theme) => `calc(${theme.spacing(2)} + 1px)`,
-                      pr: (theme) => theme.spacing(2),
-                      mb: '0 !important',
-                    },
-                    '& .fc-spaceName-button, .fc-spaceMaxBookings-button': {
-                      color: 'inherit !important',
-                      backgroundColor: 'inherit !important',
-                      border: 'none !important',
-                      boxShadow: 'none !important',
-                      cursor: 'default !important',
-                    },
-                    '& .fc-spaceName-button': {
-                      fontWeight: '500 !important',
-                    },
-                  }}
-                >
-                  <FullCalendar
-                    plugins={[interactionPlugin, dayGridPlugin]}
-                    events={events}
-                    selectable={canInteract}
-                    select={handleDateSelect}
-                    // eventClick={handleEventClick}
-                    eventContent={renderEventContent}
-                    dayCellContent={renderDayCellContent}
-                    selectAllow={({ start }) => !isInPast(start)}
-                    selectOverlap={(event) => !!event.extendedProps.isAvailable}
-                    dayMaxEventRows={MAX_DAY_EVENT_ROWS}
-                    customButtons={{
-                      spaceName: {
-                        text: spaceInfo.data.spaceInfo.name,
-                      },
-                      spaceMaxBookings: {
-                        text: `Max bookings per day: ${spaceInfo.data.spaceInfo.maxBookingsPerDay}`,
-                      },
-                      copy: {
-                        text: `Copy link: desko.io/invite/${spaceInfo.data.spaceInfo.code}`,
-                        click: () => {
-                          copyLink(
-                            `${rawBaseUrl}/invite/${
-                              spaceInfo.data?.spaceInfo.code || ''
-                            }`
-                          ).catch((err) => {
-                            throw err;
-                          });
-                          alert('Copied!');
-                        },
-                      },
-                      edit: {
-                        text: 'Edit',
-                        click: () => router.push(`/space/${spaceId}/edit`),
-                      },
-                    }}
-                    buttonText={{
-                      today: 'This month',
-                    }}
-                    headerToolbar={{
-                      start: 'title',
-                      end: `spaceName,spaceMaxBookings${
-                        isManager ? ' edit copy ' : ' '
-                      }today prev,next`,
-                    }}
-                    height="100vh"
-                    fixedWeekCount={false}
-                    defaultAllDay
-                  />
-                </Box>
-              ) : (
-                <ErrorDisplay error={getBookings.error} />
-              )
-            ) : (
-              <Loader />
-            )}
-          </>
+      <CalendarContainer
+        onDateChange={async (start, end) => {
+          prevStart.current = start;
+          prevEnd.current = end;
+          await refetch({ spaceId, start, end });
+        }}
+      >
+        {!error ? (
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              minHeight: '100vh',
+            }}
+          >
+            <AppBar
+              position="relative"
+              variant="outlined"
+              color="default"
+              elevation={0}
+            >
+              <Toolbar>
+                <ToolbarItem justifyContent="space-between" width="100%">
+                  <ToolbarItem>
+                    <CalendarViewRadioButtons isDisabled={loading} />
+                    <CalendarDateActions isDisabled={loading} />
+                  </ToolbarItem>
+                  <ToolbarItem>
+                    {!loading ? (
+                      isManager ? (
+                        <TextField
+                          disabled
+                          value={linkText}
+                          variant="outlined"
+                          size="small"
+                          InputProps={{
+                            endAdornment: (
+                              <InputAdornment position="end">
+                                <IconButton
+                                  onClick={() =>
+                                    void copy(
+                                      `${url}/invite/${data.spaceInfo.code}`
+                                    )
+                                  }
+                                >
+                                  <ContentCopyIcon />
+                                </IconButton>
+                              </InputAdornment>
+                            ),
+                          }}
+                          sx={{
+                            '.MuiInputBase-input': {
+                              width: `${linkText.length}ch`,
+                            },
+                          }}
+                        />
+                      ) : null
+                    ) : (
+                      <Loader />
+                    )}
+                  </ToolbarItem>
+                </ToolbarItem>
+              </Toolbar>
+            </AppBar>
+            <CalendarView
+              eventSlots={data?.getBookings.map(bookingSlotToEventSlot) || []}
+              createEvent={(date) => {
+                void book({ variables: { spaceId, date } });
+              }}
+              deleteEvent={(bookingId) => {
+                void cancelBooking({ variables: { bookingId } });
+              }}
+              canCreate={isUser}
+            />
+          </Box>
         ) : (
-          <ErrorDisplay error={spaceInfo.error} />
-        )
-      ) : (
-        <Loader />
-      )}
+          <ErrorDisplay error={error} />
+        )}
+      </CalendarContainer>
     </DashboardLayout>
   );
 };
 
+// eslint-disable-next-line @typescript-eslint/require-await
 SpacePage.getInitialProps = async (ctx) => {
-  const { pretty, raw } = await Promise.resolve(getBaseUrl(ctx.req));
-  return { prettyBaseUrl: pretty, rawBaseUrl: raw };
+  const { raw, pretty } = getBaseUrl(ctx.req);
+  const spaceId = getCtxQueryVar(ctx.query, 'id');
+  console.log(pretty);
+  return { url: raw, prettyUrl: pretty, spaceId };
 };
 
 export default withApollo(withAuth(SpacePage));

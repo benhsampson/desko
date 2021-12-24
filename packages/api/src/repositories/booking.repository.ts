@@ -6,7 +6,7 @@ import { User } from '../entities/user.entity';
 
 @EntityRepository(Booking)
 export class BookingRepository extends Repository<Booking> {
-  createAndSave(date: Date, space: Space, user: User) {
+  createAndSave(date: string, space: Space, user: User) {
     const booking = new Booking();
     booking.date = date;
     booking.space = space;
@@ -14,11 +14,11 @@ export class BookingRepository extends Repository<Booking> {
     return this.manager.save(booking);
   }
 
-  getCountOnDay(space: Space, day: Date) {
+  getCountOnDay(space: Space, day: string) {
     return this.manager.count(Booking, { where: { date: day, space } });
   }
 
-  async hasBookedOnDay(user: User, space: Space, day: Date) {
+  async hasBookedOnDay(user: User, space: Space, day: string) {
     return !!(await this.manager.findOne(Booking, {
       where: { date: day, user, space },
     }));

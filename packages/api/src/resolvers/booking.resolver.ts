@@ -15,7 +15,7 @@ import { getCustomRepository } from 'typeorm';
 import { BookingRepository } from '../repositories/booking.repository';
 import { SpaceRepository } from '../repositories/space.repository';
 import { UserRepository } from '../repositories/user.repository';
-import { BookIn, BookOut } from '../types/booking.type';
+import { BookIn, BookOut, GetBookingsIn } from '../types/booking.type';
 import { Context } from '../types/Context';
 import {
   getUserIdFromContext,
@@ -32,7 +32,7 @@ export class BookingResolver implements ResolverInterface<BookingSlot> {
 
   @FieldResolver()
   async isAvailable(@Root() bookingSlot: BookingSlot, @Ctx() ctx: Context) {
-    if (bookingSlot.date < getDateToday()) return false;
+    if (new Date(bookingSlot.date) < getDateToday()) return false;
 
     const userId = getUserIdFromContext(ctx);
     const user = userId
@@ -71,7 +71,7 @@ export class BookingResolver implements ResolverInterface<BookingSlot> {
 
     const space = await this.spaceRepo.findOneOrFail(spaceId);
 
-    const date = new Date(input.year, input.month, input.day);
+    const date = new Date(input.date);
 
     if (!(date instanceof Date) || isNaN(date.getTime())) {
       throw new GraphQLError('Invalid date given');
@@ -84,7 +84,7 @@ export class BookingResolver implements ResolverInterface<BookingSlot> {
     }
 
     if (
-      (await this.bookingRepo.getCountOnDay(space, date)) >=
+      (await this.bookingRepo.getCountOnDay(space, input.date)) >=
       space.maxBookingsPerDay
     ) {
       return {
@@ -97,11 +97,15 @@ export class BookingResolver implements ResolverInterface<BookingSlot> {
       };
     }
 
-    if (await this.bookingRepo.hasBookedOnDay(user, space, date)) {
+    if (await this.bookingRepo.hasBookedOnDay(user, space, input.date)) {
       throw new GraphQLError('Already booked this day');
     }
 
-    const booking = await this.bookingRepo.createAndSave(date, space, user);
+    const booking = await this.bookingRepo.createAndSave(
+      input.date,
+      space,
+      user
+    );
 
     return {
       booking,
@@ -122,7 +126,7 @@ export class BookingResolver implements ResolverInterface<BookingSlot> {
 
     const today = getDateToday();
 
-    if (booking.date < today) {
+    if (new Date(booking.date) < today) {
       throw new GraphQLError('Cannot cancel previous booking');
     }
 
@@ -133,16 +137,26 @@ export class BookingResolver implements ResolverInterface<BookingSlot> {
 
   @Query(() => [BookingSlot])
   @Authorized()
-  async getBookings(@Arg('spaceId') spaceId: string, @Ctx() ctx: Context) {
+  async getBookings(
+    @Arg('spaceId') spaceId: string,
+    @Arg('input') input: GetBookingsIn,
+    @Ctx() ctx: Context
+  ) {
     const userId = getUserIdFromContextOrFail(ctx);
 
-    const bookings = (
-      await this.bookingRepo.find({
-        where: { space: { id: spaceId } },
-        relations: ['space', 'user'],
+    const rawBookings = await this.bookingRepo
+      .createQueryBuilder('booking')
+      .leftJoinAndSelect('booking.space', 'space')
+      .leftJoinAndSelect('booking.user', 'user')
+      .where('space.id = :spaceId', { spaceId })
+      .andWhere('date BETWEEN :start AND :end', {
+        start: input.start,
+        end: input.end,
       })
-    ).map((booking) => {
-      const isTodayOrFuture = booking.date >= getDateToday();
+      .getMany();
+
+    const bookings = rawBookings.map((booking) => {
+      const isTodayOrFuture = new Date(booking.date) >= getDateToday();
       const ownsBooking = booking.user.id === userId;
       booking.canCancel = isTodayOrFuture && ownsBooking;
       return booking;
@@ -150,7 +164,7 @@ export class BookingResolver implements ResolverInterface<BookingSlot> {
 
     const groupedBookings = bookings.reduce((slots, booking) => {
       let slotIndex = slots.findIndex((slot) => {
-        return slot.date.getTime() === booking.date.getTime();
+        return Date.parse(slot.date) === Date.parse(booking.date);
       });
 
       if (slotIndex === -1) {

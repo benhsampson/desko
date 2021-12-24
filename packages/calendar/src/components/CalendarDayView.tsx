@@ -1,18 +1,57 @@
 import {
   TableContainer,
-  Table,
-  TableHead,
-  TableRow,
-  TableCell,
-  TableBody,
+  Table as MuiTable,
+  TableHead as MuiTableHead,
+  TableBody as MuiTableBody,
+  TableRow as MuiTableRow,
+  TableCell as MuiTableCell,
+  styled,
+  ButtonBase,
 } from '@mui/material';
 import moment from 'moment';
 import { useSelector } from 'react-redux';
 import { selectDate } from '../lib/features/calendar/calendarSlice';
+import { formatISOAsTimestamp } from '../lib/utils/formatAsTimestamp';
+import CalendarEventList from './CalendarEventList';
+import { CalendarViewProps } from './CalendarView';
 
-export default function CalendarDayView() {
+const Table = styled(MuiTable)({
+  display: 'grid',
+  gridTemplateRows: 'auto 1fr',
+});
+
+const TableHead = styled(MuiTableHead)({});
+
+const TableBody = styled(MuiTableBody)({});
+
+const TableRow = styled(MuiTableRow)({
+  display: 'flex',
+  flexDirection: 'column',
+  width: '100%',
+  height: '100%',
+});
+
+const TableCell = styled(MuiTableCell)(({ theme }) => ({
+  display: 'inline-flex',
+  alignItems: 'stretch',
+  justifyContent: 'flex-start',
+  padding: theme.spacing(1),
+  width: '100%',
+  height: '100%',
+}));
+
+export default function CalendarDayView(props: CalendarViewProps) {
   const date = useSelector(selectDate);
-
+  const slot = date
+    ? props.eventSlots?.find((slot) => slot.date === formatISOAsTimestamp(date))
+    : undefined;
+  const isTodayOrFuture = moment(slot?.date).isSameOrAfter(undefined, 'D');
+  console.log(props.canCreate, isTodayOrFuture, slot?.canCreate);
+  const canCreate =
+    props.canCreate && isTodayOrFuture && (slot?.canCreate ?? true);
+  const handleClick = (clickedDate: string) => {
+    props.createEvent && props.createEvent(clickedDate);
+  };
   return (
     <TableContainer sx={{ display: 'flex', flexGrow: 1 }}>
       <Table stickyHeader>
@@ -23,7 +62,20 @@ export default function CalendarDayView() {
         </TableHead>
         <TableBody>
           <TableRow>
-            <TableCell>Events go here</TableCell>
+            <TableCell
+              as={canCreate ? ButtonBase : undefined}
+              onClick={
+                canCreate && date
+                  ? () => handleClick(slot?.date || formatISOAsTimestamp(date))
+                  : () => null
+              }
+            >
+              <CalendarEventList
+                events={slot?.events || []}
+                maxRows={3}
+                handleDeleteEvent={props.deleteEvent}
+              />
+            </TableCell>
           </TableRow>
         </TableBody>
       </Table>

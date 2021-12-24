@@ -1,5 +1,5 @@
-mutation Book($spaceId: String!, $year: Int!, $month: Int!, $day: Int!) {
-  book(spaceId: $spaceId, input: { year: $year, month: $month, day: $day }) {
+mutation Book($spaceId: String!, $date: String!) {
+  book(spaceId: $spaceId, input: { date: $date }) {
     errors {
       path
       message

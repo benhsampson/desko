@@ -17,9 +17,9 @@ export class Booking {
   @Field()
   id!: string;
 
-  @Column('timestamp')
-  @Field(() => Date)
-  date!: Date;
+  @Column('date')
+  @Field()
+  date!: string;
 
   @DeleteDateColumn()
   deletedAt?: Date;

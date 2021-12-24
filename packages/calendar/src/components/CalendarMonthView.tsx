@@ -1,4 +1,4 @@
-import moment from 'moment';
+import moment, { MomentInput } from 'moment';
 import { useEffect, useState } from 'react';
 import {
   Box,
@@ -10,29 +10,38 @@ import {
   TableCell as MuiTableCell,
   TableCellProps as MuiTableCellProps,
   styled,
+  ButtonBase,
 } from '@mui/material';
 import { useSelector } from 'react-redux';
+import * as colors from '@mui/material/colors';
 
 import { selectDate, setRange } from '../lib/features/calendar/calendarSlice';
 import CalendarEventList from './CalendarEventList';
 import { useAppDispatch } from '../lib/hooks';
 import { CalendarEvent } from '../lib/types/CalendarEvent';
 import formatAsTimestamp from '../lib/utils/formatAsTimestamp';
+import { CalendarViewProps } from './CalendarView';
 
 class Slot {
   constructor(
     content: string,
     isCurrentMonth: boolean,
-    events: CalendarEvent[]
+    isCurrentDay: boolean,
+    events: CalendarEvent[],
+    timestamp: string
   ) {
     this.content = content;
     this.isCurrentMonth = isCurrentMonth;
+    this.isCurrentDay = isCurrentDay;
     this.events = events;
+    this.timestamp = timestamp;
   }
 
   content!: string;
   isCurrentMonth!: boolean;
+  isCurrentDay!: boolean;
   events!: CalendarEvent[];
+  timestamp!: string;
 }
 
 const TABLE_HEAD_HEIGHT = 33;
@@ -45,6 +54,7 @@ const Table = styled(MuiTable)(() => ({
 
 interface TableCellProps extends MuiTableCellProps {
   isWashed?: boolean;
+  isHighlighted?: boolean;
 }
 
 const TableHead = styled(MuiTableHead)({
@@ -65,12 +75,18 @@ const TableRow = styled(MuiTableRow)({
 });
 
 const TableCell = styled(MuiTableCell, {
-  shouldForwardProp: (prop) => prop !== 'isWashed',
-})<TableCellProps>(({ theme, isWashed }) => ({
-  display: 'block',
-  backgroundColor: isWashed
+  shouldForwardProp: (prop) => prop !== 'isWashed' && prop !== 'isHighlighted',
+})<TableCellProps>(({ theme, isWashed, isHighlighted }) => ({
+  display: 'inline-flex',
+  flexDirection: 'column',
+  justifyContent: 'flex-start',
+  alignItems: 'stretch',
+  backgroundColor: isHighlighted
+    ? colors.yellow[50]
+    : isWashed
     ? `rgba(0,0,0,0.05)`
     : theme.palette.background.paper,
+  color: isWashed ? theme.palette.text.secondary : theme.palette.text.primary,
   position: 'relative',
   padding: theme.spacing(0.5, 1),
   verticalAlign: 'text-top',
@@ -98,7 +114,7 @@ const smallestNumberGreaterThanOrEqualToNDivisibleByK = (
   }
 };
 
-export default function CalendarMonthView() {
+export default function CalendarMonthView(props: CalendarViewProps) {
   const WEEKDAYS = moment.weekdaysShort();
 
   const dispatch = useAppDispatch();
@@ -106,10 +122,12 @@ export default function CalendarMonthView() {
 
   const [rows, setRows] = useState<Slot[][]>([]);
 
+  const isToday = (input: MomentInput) => moment(input).isSame(new Date(), 'D');
+
   useEffect(() => {
     void (function run() {
-      const momentPreviousMonth = moment(date).subtract(1, 'M');
       const momentNow = moment(date);
+      const momentPreviousMonth = moment(date).subtract(1, 'M');
       const momentNextMonth = moment(date).add(1, 'M');
       const numberOfDaysThisMonth = momentNow.daysInMonth();
       const firstDayOfThisMonth = parseInt(
@@ -144,24 +162,39 @@ export default function CalendarMonthView() {
       dispatch(setRange({ start: startTimestamp, end: endTimestamp }));
 
       const prevM = Array.from({ length: prevCount }, (_, i) => {
+        const y = momentPreviousMonth.year();
+        const m = momentPreviousMonth.month();
         const d = sD + i;
-        return new Slot(`${d}`, false, []);
+        return new Slot(
+          `${d}`,
+          false,
+          isToday([y, m, d]),
+          [],
+          formatAsTimestamp(y, m, d)
+        );
       });
       const thisM = Array.from({ length: numberOfDaysThisMonth }, (_, i) => {
+        const y = momentNow.year();
+        const m = momentNow.month();
         const d = i + 1;
-        // const ts = momentNow.set('D', d).format(TIMESTAMP_FORMAT);
         return new Slot(
           d === 1 ? `${momentNow.format('MMM')} 1` : `${d}`,
           true,
-          []
+          isToday([y, m, d]),
+          [],
+          formatAsTimestamp(y, m, d)
         );
       });
       const nextM = Array.from({ length: nextCount }, (_, i) => {
+        const y = momentNextMonth.year();
+        const m = momentNextMonth.month();
         const d = i + 1;
         return new Slot(
           d === 1 ? `${momentNextMonth.format('MMM')} 1` : `${d}`,
           false,
-          []
+          isToday([y, m, d]),
+          [],
+          formatAsTimestamp(y, m, d)
         );
       });
 
@@ -180,11 +213,32 @@ export default function CalendarMonthView() {
     })();
   }, [date]);
 
+  const handleSlotClick = (date: string) => () => {
+    void (props.createEvent && props.createEvent(date));
+  };
+
   const slotRenderer = (slot: Slot, index: number) => {
+    const eventSlot = props.eventSlots?.find((s) => s.date === slot.timestamp);
+    const isTodayOrFuture = moment(slot.timestamp).isSameOrAfter(
+      undefined,
+      'D'
+    );
+    const canCreate =
+      props.canCreate && isTodayOrFuture && (eventSlot?.canCreate ?? true);
     return (
-      <TableCell key={`Slot${index}`} isWashed={!slot.isCurrentMonth}>
+      <TableCell
+        key={`Slot${index}`}
+        isWashed={!slot.isCurrentMonth}
+        isHighlighted={slot.isCurrentDay}
+        as={canCreate ? ButtonBase : undefined}
+        onClick={canCreate ? handleSlotClick(slot.timestamp) : () => null}
+      >
         <DayNumber>{slot.content}</DayNumber>
-        {slot.events && <CalendarEventList events={slot.events} maxRows={4} />}
+        <CalendarEventList
+          events={eventSlot?.events || []}
+          maxRows={3}
+          handleDeleteEvent={props.deleteEvent}
+        />
       </TableCell>
     );
   };

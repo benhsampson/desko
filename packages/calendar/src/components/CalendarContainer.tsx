@@ -1,9 +1,9 @@
 import { useSelector } from 'react-redux';
 import { LocalizationProvider } from '@mui/lab';
+import { useEffect } from 'react';
 import DateAdapter from '@mui/lab/AdapterMoment';
 
 import { selectRange } from '../lib/features/calendar/calendarSlice';
-import { useEffect } from 'react';
 import withRedux from '../lib/utils/withRedux';
 
 type Props = {
@@ -14,6 +14,8 @@ const CalendarContainer: React.FC<Props> = ({ children, onDateChange }) => {
   const [start, end] = useSelector(selectRange);
 
   useEffect(() => {
+    console.log(start, end);
+
     if (start && end) {
       void onDateChange(start, end);
     }

@@ -1,5 +1,5 @@
-query GetBookings($spaceId: String!) {
-  getBookings(spaceId: $spaceId) {
+query GetBookings($spaceId: String!, $start: String!, $end: String!) {
+  getBookings(spaceId: $spaceId, input: { start: $start, end: $end }) {
     date
     isAvailable
     bookings {

@@ -1,4 +1,5 @@
 import {
+  IconButton,
   List,
   ListItem as MuiListItem,
   ListItemButton as MuiListItemButton,
@@ -7,12 +8,14 @@ import {
   styled,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import CloseIcon from '@mui/icons-material/Close';
 import { useState } from 'react';
 import { ListItemIcon } from '@mui/material';
 import { CalendarEvent } from '../lib/types/CalendarEvent';
 
 type Props = {
   events: CalendarEvent[];
+  handleDeleteEvent?: (id: string) => void;
   maxRows?: number;
 };
 
@@ -55,6 +58,17 @@ export default function CalendarEventList({ maxRows = 5, ...props }: Props) {
       {events.map((event, index) => (
         <ListItem key={`EventListItem${index}`}>
           <ListItemText primary={event.name} />
+          {event.canDelete ? (
+            <IconButton
+              onClick={() => {
+                void (
+                  props.handleDeleteEvent && props.handleDeleteEvent(event.id)
+                );
+              }}
+            >
+              <CloseIcon />
+            </IconButton>
+          ) : null}
         </ListItem>
       ))}
     </>
@@ -65,7 +79,7 @@ export default function CalendarEventList({ maxRows = 5, ...props }: Props) {
       <List
         dense
         disablePadding
-        sx={{ display: 'flex', flexDirection: 'column' }}
+        sx={{ display: 'flex', flexDirection: 'column', width: '100%' }}
       >
         {renderEventItems(
           props.events.slice(0, overflow ? maxRows - 1 : maxRows)

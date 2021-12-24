@@ -10,9 +10,7 @@ type AuthOut {
 }
 
 input BookIn {
-  day: Int!
-  month: Int!
-  year: Int!
+  date: String!
 }
 
 type BookOut {
@@ -22,14 +20,14 @@ type BookOut {
 
 type Booking {
   canCancel: Boolean
-  date: DateTime!
+  date: String!
   id: String!
   user: User!
 }
 
 type BookingSlot {
   bookings: [Booking!]!
-  date: DateTime!
+  date: String!
   isAvailable: Boolean
   space: Space!
 }
@@ -66,6 +64,11 @@ type ForgotPasswordOut {
   token: String
 }
 
+input GetBookingsIn {
+  end: String!
+  start: String!
+}
+
 type JoinSpaceOut {
   errors: [UserError!]
   space: Space
@@ -92,7 +95,7 @@ type Mutation {
 }
 
 type Query {
-  getBookings(spaceId: String!): [BookingSlot!]!
+  getBookings(input: GetBookingsIn!, spaceId: String!): [BookingSlot!]!
   getStatus: StatusResponse!
   isAuthenticated: Boolean!
   joinedSpaces: [Space!]!

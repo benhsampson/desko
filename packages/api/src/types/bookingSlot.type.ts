@@ -4,8 +4,8 @@ import { Space } from '../entities/space.entity';
 
 @ObjectType()
 export class BookingSlot {
-  @Field(() => Date)
-  date!: Date;
+  @Field()
+  date!: string;
 
   @Field(() => Space)
   space!: Space;

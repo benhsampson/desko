@@ -23,13 +23,13 @@ const PORT = parseInt(process.env.API_PORT || DEFAULT_PORT, 10);
 (async () => {
   await createConnection(connectionOptions);
   const app = express();
-  // app.use(
-  //   cors({
-  //     origin: process.env.WEB_URL,
-  //     credentials: true,
-  //   })
-  // );
-  app.use(cors());
+  app.use(
+    cors({
+      origin: process.env.WEB_URL,
+      credentials: true,
+    })
+    // cors()
+  );
   const redis = new Redis(process.env.REDIS_URL);
   const schema = await buildSchema({
     resolvers: [StatusResolver, UserResolver, SpaceResolver, BookingResolver],

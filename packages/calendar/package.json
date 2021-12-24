@@ -9,16 +9,17 @@
   },
   "dependencies": {
     "@date-io/moment": "^2.11.0",
-    "@emotion/react": "^11.7.1",
-    "@emotion/style": "^0.8.0",
-    "@mui/icons-material": "^5.2.4",
-    "@mui/lab": "^5.0.0-alpha.60",
-    "@mui/material": "^5.2.4",
     "@reduxjs/toolkit": "^1.7.1",
     "moment": "^2.29.1",
-    "react": "^17.0.2",
     "react-redux": "^7.2.6",
     "redux": "^4.1.2"
+  },
+  "peerDependencies": {
+    "react": "*",
+    "react-dom": "*",
+    "@mui/icons-material": "*",
+    "@mui/lab": "*",
+    "@mui/material": "*"
   },
   "devDependencies": {
     "@types/react-redux": "^7.1.20"

@@ -1,17 +1,20 @@
-import { Field, InputType, Int, ObjectType } from 'type-graphql';
+import { Field, InputType, ObjectType } from 'type-graphql';
 import { Booking } from '../entities/booking.entity';
 import { UserError } from './UserError';
 
 @InputType()
+export class GetBookingsIn {
+  @Field()
+  start!: string;
+
+  @Field()
+  end!: string;
+}
+
+@InputType()
 export class BookIn {
-  @Field(() => Int)
-  year!: number;
-
-  @Field(() => Int)
-  month!: number;
-
-  @Field(() => Int)
-  day!: number;
+  @Field()
+  date!: string;
 }
 
 @ObjectType()
