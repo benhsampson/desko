@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import {
+  AppBar,
   Avatar,
   Box,
   Divider,
   Drawer,
+  IconButton,
   List,
   ListItem,
   ListItemAvatar,
@@ -13,12 +15,16 @@ import {
   Menu,
   MenuItem,
   styled,
+  Toolbar,
+  useTheme,
 } from '@mui/material';
 import NextLink from 'next/link';
+import useMediaQuery from '@mui/material/useMediaQuery';
 import HomeIcon from '@mui/icons-material/Home';
 import AddIcon from '@mui/icons-material/Add';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import MenuIcon from '@mui/icons-material/Menu';
 
 import Logo from './Logo';
 import {
@@ -128,16 +134,47 @@ const DashboardLayout: React.FC<Props> = ({ children, cancelBorder }) => {
     setAccountMenuAnchorEl(event.currentTarget);
   const handleAccountMenuClose = () => setAccountMenuAnchorEl(null);
 
+  const [drawerAnchorEl, setDrawerAnchorEl] =
+    React.useState<null | HTMLElement>(null);
+  const handleOpenDrawer = (ev: React.MouseEvent<HTMLElement>) =>
+    setDrawerAnchorEl(ev.currentTarget);
+  const handleCloseDrawer = () => setDrawerAnchorEl(null);
+  const isDrawerOpen = !!drawerAnchorEl;
+
+  const theme = useTheme();
+  const matches = useMediaQuery(theme.breakpoints.down('md'));
+
+  const HEADER_HEIGHT_XS = 56;
+  const HEADER_HEIGHT_SM = 64;
   const DRAWER_WIDTH = 256;
 
   return (
-    <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+    <Box sx={{ display: matches ? 'block' : 'flex', minHeight: '100vh' }}>
+      {matches && (
+        <Box sx={{ height: { xs: HEADER_HEIGHT_XS, sm: HEADER_HEIGHT_SM } }}>
+          <AppBar color="default" variant="outlined" elevation={0}>
+            <Toolbar>
+              <IconButton
+                onClick={handleOpenDrawer}
+                edge="start"
+                aria-label="menu"
+                sx={{ mr: 1 }}
+              >
+                <MenuIcon />
+              </IconButton>
+              <Logo />
+            </Toolbar>
+          </AppBar>
+        </Box>
+      )}
       <Box
         component="nav"
         sx={{ width: DRAWER_WIDTH, ...(cancelBorder && { mr: '-1px' }) }}
       >
         <Drawer
-          variant="permanent"
+          open={isDrawerOpen}
+          onClose={handleCloseDrawer}
+          variant={matches ? 'temporary' : 'permanent'}
           PaperProps={{ sx: { width: DRAWER_WIDTH } }}
         >
           <List

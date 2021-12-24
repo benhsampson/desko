@@ -70,7 +70,11 @@ const SpacePage: NextPage<Props> = ({ url, prettyUrl, spaceId }) => {
   });
 
   const ToolbarItem = ({ ...toolbarItemProps }: StackProps) => (
-    <Stack direction="row" spacing={2} {...toolbarItemProps} />
+    <Stack
+      direction={{ xs: 'column', md: 'row' }}
+      spacing={2}
+      {...toolbarItemProps}
+    />
   );
 
   const isManager = data?.userInfo.roles[0].value === 'MANAGER';
@@ -101,16 +105,20 @@ const SpacePage: NextPage<Props> = ({ url, prettyUrl, spaceId }) => {
               variant="outlined"
               color="default"
               elevation={0}
+              sx={{ padding: (theme) => ({ xs: theme.spacing(2, 0), md: 0 }) }}
             >
               <Toolbar>
-                <ToolbarItem justifyContent="space-between" width="100%">
-                  <ToolbarItem>
+                <ToolbarItem
+                  justifyContent={{ sm: 'space-between' }}
+                  width="100%"
+                >
+                  <ToolbarItem spacing={1}>
                     <CalendarViewRadioButtons isDisabled={loading} />
                     <CalendarDateActions isDisabled={loading} />
                   </ToolbarItem>
-                  <ToolbarItem>
-                    {!loading ? (
-                      isManager ? (
+                  {!loading ? (
+                    isManager ? (
+                      <ToolbarItem>
                         <TextField
                           disabled
                           value={linkText}
@@ -137,11 +145,11 @@ const SpacePage: NextPage<Props> = ({ url, prettyUrl, spaceId }) => {
                             },
                           }}
                         />
-                      ) : null
-                    ) : (
-                      <Loader />
-                    )}
-                  </ToolbarItem>
+                      </ToolbarItem>
+                    ) : null
+                  ) : (
+                    <Loader />
+                  )}
                 </ToolbarItem>
               </Toolbar>
             </AppBar>
