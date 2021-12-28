@@ -10,6 +10,7 @@ import {
   Toolbar,
 } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import EditIcon from '@mui/icons-material/Edit';
 import {
   CalendarContainer,
   CalendarDateActions,
@@ -33,6 +34,7 @@ import Loader from '../../../components/Loader';
 import useCopyToClipboard from 'packages/web/src/lib/utils/useCopyToClipboard';
 import { useRef } from 'react';
 import { useEffect } from 'react';
+import { NextLinkComposed } from 'packages/web/src/components/Link';
 
 type Props = {
   url: string;
@@ -78,7 +80,7 @@ const SpacePage: NextPage<Props> = ({ url, prettyUrl, spaceId }) => {
   );
 
   const isManager = data?.userInfo.roles[0].value === 'MANAGER';
-  const isUser = data?.userInfo.roles[0].value === 'USER';
+  // const isUser = data?.userInfo.roles[0].value === 'USER';
 
   const [, copy] = useCopyToClipboard();
   const linkText = `${prettyUrl}/invite/${data?.spaceInfo.code || ''}`;
@@ -145,6 +147,13 @@ const SpacePage: NextPage<Props> = ({ url, prettyUrl, spaceId }) => {
                             },
                           }}
                         />
+                        <IconButton
+                          component={NextLinkComposed}
+                          edge="end"
+                          to={`/space/${spaceId}/edit`}
+                        >
+                          <EditIcon />
+                        </IconButton>
                       </ToolbarItem>
                     ) : null
                   ) : (
@@ -161,7 +170,7 @@ const SpacePage: NextPage<Props> = ({ url, prettyUrl, spaceId }) => {
               deleteEvent={(bookingId) => {
                 void cancelBooking({ variables: { bookingId } });
               }}
-              canCreate={isUser}
+              canCreate={true}
             />
           </Box>
         ) : (

@@ -75,10 +75,15 @@ interface SharedSpace extends Partial<Space> {
 }
 
 type Props = {
+  openByDefault?: boolean;
   cancelBorder?: boolean;
 };
 
-const DashboardLayout: React.FC<Props> = ({ children, cancelBorder }) => {
+const DashboardLayout: React.FC<Props> = ({
+  children,
+  openByDefault,
+  cancelBorder,
+}) => {
   const logout = useLogout();
   const spaceId = useQueryVar('id');
 
@@ -174,7 +179,7 @@ const DashboardLayout: React.FC<Props> = ({ children, cancelBorder }) => {
         <Drawer
           open={isDrawerOpen}
           onClose={handleCloseDrawer}
-          variant={matches ? 'temporary' : 'permanent'}
+          variant={!openByDefault && matches ? 'temporary' : 'permanent'}
           PaperProps={{ sx: { width: DRAWER_WIDTH } }}
         >
           <List
@@ -210,14 +215,16 @@ const DashboardLayout: React.FC<Props> = ({ children, cancelBorder }) => {
                 </NextLink>
               ))}
               <Divider />
-              <NextLink href="/space/new">
-                <ListItemButton type="category">
-                  <ListItemIcon>
-                    <AddIcon />
-                  </ListItemIcon>
-                  <ListItemText>Create new space</ListItemText>
-                </ListItemButton>
-              </NextLink>
+              {isManager && (
+                <NextLink href="/space/new">
+                  <ListItemButton type="category">
+                    <ListItemIcon>
+                      <AddIcon />
+                    </ListItemIcon>
+                    <ListItemText>Create new space</ListItemText>
+                  </ListItemButton>
+                </NextLink>
+              )}
             </Box>
             <Box sx={{ flexGrow: 0 }}>
               {!_userInfo.loading ? (

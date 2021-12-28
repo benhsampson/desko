@@ -39,7 +39,9 @@ export class BookingResolver implements ResolverInterface<BookingSlot> {
       ? await this.userRepo.findOne(userId, { relations: ['roles'] })
       : null;
 
-    if (!user || !user.roles.some((r) => r.value === 'USER')) return false;
+    // Removed Role Check
+    // if (!user || !user.roles.some((r) => r.value === 'USER')) return false;
+    if (!user) return false;
 
     const existingBookingsCount = await this.bookingRepo.getCountOnDay(
       bookingSlot.space,
@@ -60,7 +62,7 @@ export class BookingResolver implements ResolverInterface<BookingSlot> {
   }
 
   @Mutation(() => BookOut)
-  @Authorized('USER')
+  @Authorized()
   async book(
     @Arg('spaceId') spaceId: string,
     @Arg('input') input: BookIn,
@@ -113,7 +115,7 @@ export class BookingResolver implements ResolverInterface<BookingSlot> {
   }
 
   @Mutation(() => Boolean)
-  @Authorized('USER')
+  @Authorized()
   async cancelBooking(
     @Arg('bookingId') bookingId: string,
     @Ctx() ctx: Context
