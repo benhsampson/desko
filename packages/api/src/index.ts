@@ -1,6 +1,8 @@
 import dotenvFlow from 'dotenv-flow';
 dotenvFlow.config();
 
+console.log(process.env);
+
 import { ApolloServer, ApolloError } from 'apollo-server-express';
 import express from 'express';
 import cors from 'cors';

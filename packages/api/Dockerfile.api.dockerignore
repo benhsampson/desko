@@ -7,5 +7,7 @@
 !packages/api/package.json
 !packages/api/.env.production
 !packages/api/.env.production.local
+!packages/api/.env.development
+!packages/api/.env.development.local
 !packages/api/tsconfig.json
 !packages/api/src/

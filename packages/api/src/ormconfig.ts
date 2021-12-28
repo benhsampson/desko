@@ -1,9 +1,6 @@
-// import dotenvFlow from 'dotenv-flow';
-// import path from 'path';
-// dotenvFlow.config({ path: path.join(__dirname, '../../../') });
-// dotenvFlow.config();
-
-// console.log(process.env);
+import dotenvFlow from 'dotenv-flow';
+import path from 'path';
+dotenvFlow.config({ path: path.join(__dirname, '../../../') });
 
 import { ConnectionOptions } from 'typeorm';
 

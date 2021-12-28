@@ -11,9 +11,13 @@
     "ts:migrate:create": "yarn ts:typeorm migration:create -d src/migrations/ -f src/ormconfig.ts -n",
     "ts:migrate:up": "yarn ts:typeorm migration:run -f src/ormconfig.ts",
     "ts:migrate:down": "yarn ts:typeorm migration:revert -f src/ormconfig.ts",
-    "js:typeorm": "cross-env NODE_END=production node -r dotenv-flow/config ../../node_modules/typeorm/cli.js",
-    "js:migrate:up": "yarn js:typeorm migration:run -f dist/ormconfig.js",
-    "js:migrate:down": "yarn js:typeorm migration:revert -f dist/ormconfig.js",
+    "js:typeorm": "typeorm",
+    "js:typeorm:dev": "cross-env NODE_ENV=development yarn js:typeorm",
+    "js:typeorm:prod": "cross-env NODE_ENV=production yarn js:typeorm",
+    "js:migrate:up:dev": "yarn js:typeorm:dev migration:run -f dist/ormconfig.js",
+    "js:migrate:up:prod": "yarn js:typeorm:prod migration:run -f dist/ormconfig.js",
+    "js:migrate:down:dev": "yarn js:typeorm:dev migration:revert -f dist/ormconfig.js",
+    "js:migrate:down:prod": "yarn js:typeorm:prod migration:revert -f dist/ormconfig.js",
     "lint": "eslint src/**"
   },
   "dependencies": {

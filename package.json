@@ -4,9 +4,10 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "_docker_compose": "cross-env COMPOSE_DOCKER_CLI_BUILD=1 DOCKER_BUILDKIT=1 BUILDKIT_PROGRESS=plain docker -c remote compose",
-    "docker:build": "yarn _docker_compose build",
-    "docker:up": "yarn _docker_compose up"
+    "_docker": "cross-env NODE_ENV=development docker",
+    "_docker:buildkit": "cross-env COMPOSE_DOCKER_CLI_BUILD=1 DOCKER_BUILDKIT=1 BUILDKIT_PROGRESS=plain docker",
+    "compose:remote": "docker -c remote compose -f docker-compose.yml -f docker-compose.prod.yml",
+    "compose:local": "yarn _docker compose -f docker-compose.yml -f docker-compose.dev.yml"
   },
   "workspaces": [
     "packages/*"
@@ -15,6 +16,7 @@
     "@mui/icons-material": "^5.2.4",
     "@mui/lab": "^5.0.0-alpha.60",
     "@mui/material": "^5.2.4",
+    "dotenv-flow": "^3.2.0",
     "graphql": "^15.3.0",
     "react": "^17.0.2",
     "react-dom": "^17.0.2"

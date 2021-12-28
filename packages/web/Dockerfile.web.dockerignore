@@ -5,9 +5,11 @@
 !base.tsconfig.json
 !tsconfig.json
 !base.eslintrc.json
+!packages/calendar/package.json
+!packages/calendar/tsconfig.json
+!packages/calendar/src/
 !packages/web/package.json
-!packages/web/.env.production
-!packages/web/.env.production.local
+!packages/web/.env.local
 !packages/web/tsconfig.json
 !packages/web/next.config.js
 !packages/web/.eslintrc.json

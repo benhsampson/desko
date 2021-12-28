@@ -1,21 +1,31 @@
 FROM node:16-alpine AS base
 WORKDIR /app/base
-COPY . .
+COPY ./ ./
 RUN yarn install --immutable --immutable-cache --check-cache
 RUN yarn workspace api build
 
-FROM node:16-alpine AS api
+FROM node:16-alpine AS dev 
+WORKDIR /app/api
+ENV NODE_ENV development
+COPY --from=base /app/base/package.json ./
+COPY --from=base /app/base/yarn.lock ./
+COPY --from=base /app/base/packages/api/package.json packages/api/
+COPY --from=base /app/base/packages/api/.env.development ./
+COPY --from=base /app/base/packages/api/.env.development.local ./
+COPY --from=base /app/base/packages/api/dist/ packages/api/dist/
+COPY --from=base /app/base/node_modules/ node_modules/
+EXPOSE 4000 
+CMD ["node", "packages/api/dist/index.js"]
+
+FROM node:16-alpine AS prod
 WORKDIR /app/api
 ENV NODE_ENV production
 COPY --from=base /app/base/package.json ./
 COPY --from=base /app/base/yarn.lock ./
 COPY --from=base /app/base/packages/api/package.json packages/api/
-# FIX: Needs to copy to packages/api/
 COPY --from=base /app/base/packages/api/.env.production ./
 COPY --from=base /app/base/packages/api/.env.production.local ./
 COPY --from=base /app/base/packages/api/dist/ packages/api/dist/
 COPY --from=base /app/base/node_modules/ node_modules/
-# RUN yarn install --production
-# TODO: Use ENV
 EXPOSE 4000 
 CMD ["node", "packages/api/dist/index.js"]

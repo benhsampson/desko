@@ -30,6 +30,8 @@ type WithApolloContext = NextPageContext & WithApolloParams;
 
 const SSR_MODE = typeof window === 'undefined';
 
+console.log(process.env.NEXT_PUBLIC_API_URL);
+
 const httpLink = createHttpLink({
   uri: process.env.NEXT_PUBLIC_API_URL,
   credentials: 'include',
