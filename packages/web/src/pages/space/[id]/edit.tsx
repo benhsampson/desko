@@ -1,3 +1,4 @@
+import { Box, Button, Stack, TextField, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { SubmitHandler, useForm } from 'react-hook-form';
@@ -14,6 +15,7 @@ import {
 import { partitionErrors } from '../../../lib/utils/partitionErrors';
 import ErrorList from '../../../components/ErrorList';
 import DashboardLayout from 'packages/web/src/components/DashboardLayout';
+import Loader from 'packages/web/src/components/Loader';
 
 const SpaceEditPage = () => {
   // TODO: Check if null in getInitialProps()
@@ -23,19 +25,14 @@ const SpaceEditPage = () => {
     variables: { spaceId },
   });
 
-  const [updateSpace] = useUpdateSpaceMutation();
+  const [updateSpace, { loading }] = useUpdateSpaceMutation();
 
-  const {
-    register,
-    handleSubmit,
-    setError,
-    reset,
-    formState: { errors, dirtyFields },
-  } = useForm<UpdateSpaceIn>({
-    defaultValues: {
-      ...spaceInfo.data?.spaceInfo,
-    },
-  });
+  const { register, handleSubmit, setError, reset, formState } =
+    useForm<UpdateSpaceIn>({
+      defaultValues: {
+        ...spaceInfo.data?.spaceInfo,
+      },
+    });
 
   useEffect(() => {
     reset(spaceInfo.data?.spaceInfo);
@@ -45,7 +42,7 @@ const SpaceEditPage = () => {
 
   const onSubmit: SubmitHandler<UpdateSpaceIn> = async (input) => {
     const dirtyInput = [...(Object.keys(input) as (keyof UpdateSpaceIn)[])]
-      .filter((key) => dirtyFields[key])
+      .filter((key) => formState.dirtyFields[key])
       .reduce(
         (acc, key) => ({
           ...acc,
@@ -87,31 +84,47 @@ const SpaceEditPage = () => {
 
   return (
     <DashboardLayout>
-      {!spaceInfo.loading && spaceInfo.data ? (
-        <h1>
-          edit{' '}
-          <Link href={`/space/${spaceInfo.data?.spaceInfo.id}`}>
-            {spaceInfo.data?.spaceInfo.name}
-          </Link>
-        </h1>
-      ) : (
-        <p>loading...</p>
-      )}
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <ErrorList errors={genericErrors} />
-        <input {...register('name')} placeholder="name" />
-        {errors.name?.message}
-        <input
-          {...register('maxBookingsPerDay', {
-            valueAsNumber: true,
-          })}
-          placeholder="max bookings per day"
-          type="number"
-          step="1"
-        />
-        {errors.maxBookingsPerDay?.message}
-        <button type="submit">save</button>
-      </form>
+      <Box maxWidth={480} p={4}>
+        {!spaceInfo.loading && spaceInfo.data ? (
+          <Typography variant="h4" gutterBottom>
+            Edit{' '}
+            <Link href={`/space/${spaceInfo.data?.spaceInfo.id}`}>
+              {spaceInfo.data?.spaceInfo.name}
+            </Link>
+          </Typography>
+        ) : (
+          <Loader />
+        )}
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <Stack spacing={3}>
+            <ErrorList errors={genericErrors} />
+            <TextField
+              label="Name"
+              {...register('name', { required: true })}
+              error={!!formState.errors.name?.message}
+              helperText={formState.errors.name?.message}
+            />
+            <TextField
+              {...register('maxBookingsPerDay', {
+                valueAsNumber: true,
+                required: true,
+              })}
+              placeholder="max bookings per day"
+              type="number"
+              error={!!formState.errors.maxBookingsPerDay?.message}
+              helperText={formState.errors.maxBookingsPerDay?.message}
+            />
+            <Button
+              disabled={loading}
+              type="submit"
+              size="large"
+              variant="contained"
+            >
+              Save
+            </Button>
+          </Stack>
+        </form>
+      </Box>
     </DashboardLayout>
   );
 };

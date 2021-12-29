@@ -12,10 +12,17 @@ import {
   Toolbar,
   useTheme,
   useMediaQuery,
+  Fab,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  Dialog,
+  Button,
 } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import EditIcon from '@mui/icons-material/Edit';
 import CloseIcon from '@mui/icons-material/Close';
+import AddIcon from '@mui/icons-material/Add';
 import {
   CalendarContainer,
   CalendarDateActions,
@@ -103,6 +110,8 @@ const SpacePage: NextPage<Props> = ({ url, prettyUrl, spaceId }) => {
   const theme = useTheme();
   const matches = useMediaQuery(theme.breakpoints.down('sm'));
 
+  const [isBookModalOpen, setIsBookModalOpen] = useState(false);
+
   return (
     <DashboardLayout cancelBorder>
       <Snackbar
@@ -131,6 +140,27 @@ const SpacePage: NextPage<Props> = ({ url, prettyUrl, spaceId }) => {
             minHeight: '100vh',
           }}
         >
+          <Dialog
+            onClose={() => setIsBookModalOpen(false)}
+            open={isBookModalOpen}
+          >
+            <DialogTitle>Book Spaces</DialogTitle>
+            <DialogContent>
+              <DialogContentText>{`To book a space, simply click on the day you'd like to book in the Day/Month view.`}</DialogContentText>
+            </DialogContent>
+          </Dialog>
+          <Fab
+            onClick={() => setIsBookModalOpen(true)}
+            color="primary"
+            sx={{
+              position: 'absolute',
+              bottom: 16,
+              right: 16,
+              zIndex: 2,
+            }}
+          >
+            <AddIcon />
+          </Fab>
           {error && <ErrorDisplay error={error} />}
           <AppBar
             position="relative"
@@ -177,13 +207,14 @@ const SpacePage: NextPage<Props> = ({ url, prettyUrl, spaceId }) => {
                           },
                         }}
                       />
-                      <IconButton
+                      <Button
                         component={NextLinkComposed}
-                        edge="end"
+                        color="inherit"
                         to={`/space/${spaceId}/edit`}
+                        startIcon={<EditIcon />}
                       >
-                        <EditIcon />
-                      </IconButton>
+                        {`Edit ${data.spaceInfo.name}`}
+                      </Button>
                     </ToolbarItem>
                   ) : null
                 ) : (

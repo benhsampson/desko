@@ -1,3 +1,4 @@
+import { Box, Button, Stack, TextField, Typography } from '@mui/material';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
@@ -14,14 +15,10 @@ import {
 } from '../../__generated__/graphql';
 
 const SpaceNewPage = () => {
-  const [createSpace] = useCreateSpaceMutation();
+  const [createSpace, { loading }] = useCreateSpaceMutation();
 
-  const {
-    register,
-    handleSubmit,
-    setError,
-    formState: { errors },
-  } = useForm<CreateSpaceIn>();
+  const { register, handleSubmit, setError, formState } =
+    useForm<CreateSpaceIn>();
 
   const router = useRouter();
 
@@ -51,23 +48,40 @@ const SpaceNewPage = () => {
 
   return (
     <DashboardLayout>
-      <h1>create new space</h1>
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <ErrorList errors={genericErrors} />
-        <input {...register('name')} placeholder="name" />
-        {errors.name?.message}
-        <input
-          {...register('maxBookingsPerDay', {
-            valueAsNumber: true,
-            required: true,
-          })}
-          placeholder="max bookings per day"
-          type="number"
-          step="1"
-        />
-        {errors.maxBookingsPerDay?.message}
-        <button type="submit">create</button>
-      </form>
+      <Box maxWidth={480} p={4}>
+        <Typography variant="h4" gutterBottom>
+          Create new space
+        </Typography>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <Stack spacing={3}>
+            <ErrorList errors={genericErrors} />
+            <TextField
+              label="Name"
+              error={!!formState.errors.name?.message}
+              helperText={formState.errors.name?.message}
+              {...register('name', { required: true })}
+            />
+            <TextField
+              type="number"
+              label="Max bookings per day"
+              error={!!formState.errors.maxBookingsPerDay?.message}
+              helperText={formState.errors.maxBookingsPerDay?.message}
+              {...register('maxBookingsPerDay', {
+                valueAsNumber: true,
+                required: true,
+              })}
+            />
+            <Button
+              disabled={loading}
+              type="submit"
+              size="large"
+              variant="contained"
+            >
+              Create
+            </Button>
+          </Stack>
+        </form>
+      </Box>
     </DashboardLayout>
   );
 };
