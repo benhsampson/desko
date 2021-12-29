@@ -9,8 +9,10 @@ import {
   ButtonBase,
 } from '@mui/material';
 import moment from 'moment';
-import { useSelector } from 'react-redux';
-import { selectDate } from '../lib/features/calendar/calendarSlice';
+import { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+
+import { selectDate, setRange } from '../lib/features/calendar/calendarSlice';
 import { formatISOAsTimestamp } from '../lib/utils/formatAsTimestamp';
 import CalendarEventList from './CalendarEventList';
 import { CalendarViewProps } from './CalendarView';
@@ -41,12 +43,25 @@ const TableCell = styled(MuiTableCell)(({ theme }) => ({
 }));
 
 export default function CalendarDayView(props: CalendarViewProps) {
+  const dispatch = useDispatch();
   const date = useSelector(selectDate);
   const slot = date
     ? props.eventSlots?.find((slot) => slot.date === formatISOAsTimestamp(date))
     : undefined;
-  const isTodayOrFuture = moment(slot?.date).isSameOrAfter(undefined, 'D');
-  console.log(props.canCreate, isTodayOrFuture, slot?.canCreate);
+
+  useEffect(() => {
+    if (date) {
+      dispatch(
+        setRange({
+          start: formatISOAsTimestamp(date),
+          end: formatISOAsTimestamp(date),
+        })
+      );
+    }
+  }, [date]);
+
+  const isTodayOrFuture = moment(date).isSameOrAfter(undefined, 'D');
+  // console.log(props.canCreate, isTodayOrFuture, slot?.canCreate);
   const canCreate =
     props.canCreate && isTodayOrFuture && (slot?.canCreate ?? true);
   const handleClick = (clickedDate: string) => {
@@ -66,7 +81,7 @@ export default function CalendarDayView(props: CalendarViewProps) {
               as={canCreate ? ButtonBase : undefined}
               onClick={
                 canCreate && date
-                  ? () => handleClick(slot?.date || formatISOAsTimestamp(date))
+                  ? () => handleClick(formatISOAsTimestamp(date))
                   : () => null
               }
             >

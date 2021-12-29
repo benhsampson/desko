@@ -17,6 +17,7 @@ type Props = {
 const CalendarViewRadioButtons = ({ isDisabled }: Props) => {
   const view = useAppSelector(selectView);
   const dispatch = useAppDispatch();
+
   return (
     <>
       <ButtonGroup variant="outlined" disabled={isDisabled}>

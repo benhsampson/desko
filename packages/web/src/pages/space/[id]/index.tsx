@@ -1,16 +1,21 @@
 import { NextPage } from 'next';
+import { useRef, useState, useEffect } from 'react';
 import {
   AppBar,
   Box,
   IconButton,
   InputAdornment,
+  Snackbar,
   Stack,
   StackProps,
   TextField,
   Toolbar,
+  useTheme,
+  useMediaQuery,
 } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import EditIcon from '@mui/icons-material/Edit';
+import CloseIcon from '@mui/icons-material/Close';
 import {
   CalendarContainer,
   CalendarDateActions,
@@ -29,12 +34,10 @@ import {
   useCancelBookingMutation,
 } from '../../../__generated__/graphql';
 import DashboardLayout from '../../../components/DashboardLayout';
-import ErrorDisplay from '../../../components/ErrorDisplay';
 import Loader from '../../../components/Loader';
 import useCopyToClipboard from 'packages/web/src/lib/utils/useCopyToClipboard';
-import { useRef } from 'react';
-import { useEffect } from 'react';
 import { NextLinkComposed } from 'packages/web/src/components/Link';
+import ErrorDisplay from 'packages/web/src/components/ErrorDisplay';
 
 type Props = {
   url: string;
@@ -48,7 +51,7 @@ const SpacePage: NextPage<Props> = ({ url, prettyUrl, spaceId }) => {
   const { error, loading, data, refetch } = useSpaceDataQuery({
     variables: { spaceId, start: '', end: '' },
   });
-  const [book] = useBookMutation({
+  const [book, bookOut] = useBookMutation({
     refetchQueries: ['SpaceData'],
   });
   const [cancelBooking] = useCancelBookingMutation({
@@ -85,97 +88,121 @@ const SpacePage: NextPage<Props> = ({ url, prettyUrl, spaceId }) => {
   const [, copy] = useCopyToClipboard();
   const linkText = `${prettyUrl}/invite/${data?.spaceInfo.code || ''}`;
 
+  const [sbOpen, setSbOpen] = useState(false);
+
+  const handleSbClose = () => {
+    setSbOpen(false);
+  };
+
+  useEffect(() => {
+    if (bookOut.data?.book.errors?.length) {
+      setSbOpen(true);
+    }
+  }, [bookOut.data?.book.errors]);
+
+  const theme = useTheme();
+  const matches = useMediaQuery(theme.breakpoints.down('sm'));
+
   return (
     <DashboardLayout cancelBorder>
+      <Snackbar
+        open={sbOpen}
+        autoHideDuration={5000}
+        onClose={handleSbClose}
+        message="Day at full capacity. Try another time."
+        action={
+          <IconButton size="small" color="inherit" onClick={handleSbClose}>
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        }
+      />
       <CalendarContainer
         onDateChange={async (start, end) => {
           prevStart.current = start;
           prevEnd.current = end;
           await refetch({ spaceId, start, end });
         }}
+        defaultView={matches ? 'DAY' : 'MONTH'}
       >
-        {!error ? (
-          <Box
-            sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              minHeight: '100vh',
-            }}
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            minHeight: '100vh',
+          }}
+        >
+          {error && <ErrorDisplay error={error} />}
+          <AppBar
+            position="relative"
+            variant="outlined"
+            color="default"
+            elevation={0}
+            sx={{ padding: (theme) => ({ xs: theme.spacing(2, 0), md: 0 }) }}
           >
-            <AppBar
-              position="relative"
-              variant="outlined"
-              color="default"
-              elevation={0}
-              sx={{ padding: (theme) => ({ xs: theme.spacing(2, 0), md: 0 }) }}
-            >
-              <Toolbar>
-                <ToolbarItem
-                  justifyContent={{ sm: 'space-between' }}
-                  width="100%"
-                >
-                  <ToolbarItem spacing={1}>
-                    <CalendarViewRadioButtons isDisabled={loading} />
-                    <CalendarDateActions isDisabled={loading} />
-                  </ToolbarItem>
-                  {!loading ? (
-                    isManager ? (
-                      <ToolbarItem>
-                        <TextField
-                          disabled
-                          value={linkText}
-                          variant="outlined"
-                          size="small"
-                          InputProps={{
-                            endAdornment: (
-                              <InputAdornment position="end">
-                                <IconButton
-                                  onClick={() =>
-                                    void copy(
-                                      `${url}/invite/${data.spaceInfo.code}`
-                                    )
-                                  }
-                                >
-                                  <ContentCopyIcon />
-                                </IconButton>
-                              </InputAdornment>
-                            ),
-                          }}
-                          sx={{
-                            '.MuiInputBase-input': {
-                              width: `${linkText.length}ch`,
-                            },
-                          }}
-                        />
-                        <IconButton
-                          component={NextLinkComposed}
-                          edge="end"
-                          to={`/space/${spaceId}/edit`}
-                        >
-                          <EditIcon />
-                        </IconButton>
-                      </ToolbarItem>
-                    ) : null
-                  ) : (
-                    <Loader />
-                  )}
+            <Toolbar>
+              <ToolbarItem
+                justifyContent={{ sm: 'space-between' }}
+                width="100%"
+              >
+                <ToolbarItem spacing={1}>
+                  <CalendarViewRadioButtons isDisabled={loading} />
+                  <CalendarDateActions isDisabled={loading} />
                 </ToolbarItem>
-              </Toolbar>
-            </AppBar>
-            <CalendarView
-              eventSlots={data?.getBookings.map(bookingSlotToEventSlot) || []}
-              createEvent={(date) => {
-                void book({ variables: { spaceId, date } });
-              }}
-              deleteEvent={(bookingId) => {
-                void cancelBooking({ variables: { bookingId } });
-              }}
-              canCreate={true}
-            />
-          </Box>
-        ) : (
-          <ErrorDisplay error={error} />
-        )}
+                {!loading ? (
+                  isManager ? (
+                    <ToolbarItem>
+                      <TextField
+                        disabled
+                        value={linkText}
+                        variant="outlined"
+                        size="small"
+                        InputProps={{
+                          endAdornment: (
+                            <InputAdornment position="end">
+                              <IconButton
+                                onClick={() =>
+                                  void copy(
+                                    `${url}/invite/${data.spaceInfo.code}`
+                                  )
+                                }
+                              >
+                                <ContentCopyIcon />
+                              </IconButton>
+                            </InputAdornment>
+                          ),
+                        }}
+                        sx={{
+                          '.MuiInputBase-input': {
+                            width: `${linkText.length}ch`,
+                          },
+                        }}
+                      />
+                      <IconButton
+                        component={NextLinkComposed}
+                        edge="end"
+                        to={`/space/${spaceId}/edit`}
+                      >
+                        <EditIcon />
+                      </IconButton>
+                    </ToolbarItem>
+                  ) : null
+                ) : (
+                  <Loader />
+                )}
+              </ToolbarItem>
+            </Toolbar>
+          </AppBar>
+          <CalendarView
+            eventSlots={data?.getBookings.map(bookingSlotToEventSlot) || []}
+            createEvent={(date) => {
+              void book({ variables: { spaceId, date } });
+            }}
+            deleteEvent={(bookingId) => {
+              void cancelBooking({ variables: { bookingId } });
+            }}
+            canCreate={true}
+          />
+        </Box>
       </CalendarContainer>
     </DashboardLayout>
   );
