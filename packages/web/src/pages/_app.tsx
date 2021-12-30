@@ -10,6 +10,7 @@ const App = ({ Component, pageProps }: NextAppProps) => {
       <Head>
         <title>desko.io</title>
         <meta name="viewport" content="initial-scale=1, width=device-width" />
+        <link rel="icon" type="image/x-icon" href="/Logo.svg" />
       </Head>
       <ThemeProvider theme={theme}>
         <CssBaseline />

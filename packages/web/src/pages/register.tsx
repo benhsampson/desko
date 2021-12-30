@@ -60,8 +60,8 @@ function RegisterPage() {
       mainHeading={isUser ? 'Get started to proceed.' : 'Get started for free.'}
       subHeading={
         isUser
-          ? 'Create an account to join this space.'
-          : 'Get started to manage your space for free. No credit card needed.'
+          ? 'Create an account to start booking desks.'
+          : 'Manage your space for free. No credit card needed.'
       }
       headerContent={
         <>

@@ -67,7 +67,7 @@ function LoginPage() {
       mainHeading={isUser ? 'Sign in to proceed.' : 'Sign in to desko.io.'}
       subHeading={
         isUser
-          ? 'Enter your details below to join this space.'
+          ? 'Enter your details below to start booking desks.'
           : 'Enter your details below.'
       }
       headerContent={
