@@ -26,3 +26,5 @@ dump.rdb
 __generated__/
 *.graphql.d.ts
 *.graphqls.d.ts
+
+mailKey.json
