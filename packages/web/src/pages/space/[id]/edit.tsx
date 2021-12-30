@@ -1,9 +1,9 @@
+import { NextPage } from 'next';
 import { Box, Button, Stack, TextField, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { SubmitHandler, useForm } from 'react-hook-form';
 
-import { useQueryVar } from '../../../lib/utils/useQueryVar';
 import withApollo from '../../../lib/utils/withApollo';
 import withAuth from '../../../lib/utils/withAuth';
 import {
@@ -16,33 +16,47 @@ import { partitionErrors } from '../../../lib/utils/partitionErrors';
 import ErrorList from '../../../components/ErrorList';
 import DashboardLayout from 'packages/web/src/components/DashboardLayout';
 import Loader from 'packages/web/src/components/Loader';
+import getCtxQueryVar from 'packages/web/src/lib/utils/getCtxQueryVar';
 
-const SpaceEditPage = () => {
-  // TODO: Check if null in getInitialProps()
-  const spaceId = useQueryVar('id') || '404';
+type Props = {
+  spaceId: string;
+};
 
+const SpaceEditPage: NextPage<Props> = ({ spaceId }) => {
   const spaceInfo = useSpaceInfoQuery({
     variables: { spaceId },
   });
 
   const [updateSpace, { loading }] = useUpdateSpaceMutation();
 
-  const { register, handleSubmit, setError, reset, formState } =
-    useForm<UpdateSpaceIn>({
-      defaultValues: {
-        ...spaceInfo.data?.spaceInfo,
-      },
-    });
+  const {
+    register,
+    handleSubmit,
+    setError,
+    reset,
+    formState: { dirtyFields, errors },
+  } = useForm<UpdateSpaceIn>({
+    defaultValues: {
+      ...spaceInfo.data?.spaceInfo,
+    },
+  });
 
   useEffect(() => {
-    reset(spaceInfo.data?.spaceInfo);
+    if (spaceInfo.data?.spaceInfo) {
+      console.log('RESET');
+      const info = spaceInfo.data.spaceInfo;
+      reset({
+        name: info.name,
+        maxBookingsPerDay: info.maxBookingsPerDay,
+      });
+    }
   }, [reset, spaceInfo.data?.spaceInfo]);
 
   const [genericErrors, setGenericErrors] = useState<UserError[]>([]);
 
   const onSubmit: SubmitHandler<UpdateSpaceIn> = async (input) => {
     const dirtyInput = [...(Object.keys(input) as (keyof UpdateSpaceIn)[])]
-      .filter((key) => formState.dirtyFields[key])
+      .filter((key) => dirtyFields[key])
       .reduce(
         (acc, key) => ({
           ...acc,
@@ -84,6 +98,7 @@ const SpaceEditPage = () => {
 
   return (
     <DashboardLayout>
+      {/* {JSON.stringify(formState.dirtyFields)} */}
       <Box maxWidth={480} p={4}>
         {!spaceInfo.loading && spaceInfo.data ? (
           <Typography variant="h4" gutterBottom>
@@ -101,8 +116,8 @@ const SpaceEditPage = () => {
             <TextField
               label="Name"
               {...register('name', { required: true })}
-              error={!!formState.errors.name?.message}
-              helperText={formState.errors.name?.message}
+              error={!!errors.name?.message}
+              helperText={errors.name?.message}
             />
             <TextField
               {...register('maxBookingsPerDay', {
@@ -111,8 +126,8 @@ const SpaceEditPage = () => {
               })}
               placeholder="max bookings per day"
               type="number"
-              error={!!formState.errors.maxBookingsPerDay?.message}
-              helperText={formState.errors.maxBookingsPerDay?.message}
+              error={!!errors.maxBookingsPerDay?.message}
+              helperText={errors.maxBookingsPerDay?.message}
             />
             <Button
               disabled={loading}
@@ -127,6 +142,12 @@ const SpaceEditPage = () => {
       </Box>
     </DashboardLayout>
   );
+};
+
+// eslint-disable-next-line @typescript-eslint/require-await
+SpaceEditPage.getInitialProps = async (ctx) => {
+  const spaceId = getCtxQueryVar(ctx.query, 'id');
+  return { spaceId };
 };
 
 export default withApollo(withAuth(SpaceEditPage));
