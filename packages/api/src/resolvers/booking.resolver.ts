@@ -75,6 +75,8 @@ export class BookingResolver implements ResolverInterface<BookingSlot> {
 
     const date = new Date(input.date);
 
+    // TODO: Check that we have joined this space.
+
     if (!(date instanceof Date) || isNaN(date.getTime())) {
       throw new GraphQLError('Invalid date given');
     }

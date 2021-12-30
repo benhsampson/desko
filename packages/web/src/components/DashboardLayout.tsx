@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   AppBar,
   Avatar,
@@ -28,7 +28,6 @@ import MenuIcon from '@mui/icons-material/Menu';
 
 import Logo from './Logo';
 import {
-  Space,
   useJoinedSpacesQuery,
   useManagerSpacesQuery,
   useUserInfoQuery,
@@ -67,13 +66,6 @@ const ListItemButton = styled(MuiListItemButton, {
     : {}),
 }));
 
-interface SharedSpace extends Partial<Space> {
-  id: string;
-  name: string;
-  maxBookingsPerDay: number;
-  code?: string;
-}
-
 type Props = {
   openByDefault?: boolean;
   cancelBorder?: boolean;
@@ -87,50 +79,49 @@ const DashboardLayout: React.FC<Props> = ({
   const logout = useLogout();
   const spaceId = useQueryVar('id');
 
-  const [spaces, setSpaces] = useState<SharedSpace[]>([]);
-  const [isManager, setIsManager] = useState(false);
-
   const _userInfo = useUserInfoQuery();
-  const _managerSpaces = useManagerSpacesQuery({
-    skip: true,
-  });
-  const _joinedSpaces = useJoinedSpacesQuery({ skip: true });
+  const _managerSpaces = useManagerSpacesQuery();
+  const _joinedSpaces = useJoinedSpacesQuery();
 
-  useEffect(() => {
-    const handler = async () => {
-      const userInfo = await _userInfo.refetch();
+  const isManager =
+    _userInfo.data?.userInfo.roles.findIndex((r) => r.value === 'MANAGER') !=
+    -1;
 
-      if (!userInfo.error && userInfo.data) {
-        switch (userInfo.data.userInfo.roles[0].value) {
-          case 'MANAGER':
-            setIsManager(true);
+  // useEffect(() => {
+  //   const handler = async () => {
+  //     const userInfo = await _userInfo.refetch();
 
-            const managerSpaces = await _managerSpaces.refetch();
+  //     if (!userInfo.error && userInfo.data) {
+  //       switch (userInfo.data.userInfo.roles[0].value) {
+  //         case 'MANAGER':
+  //           setIsManager(true);
 
-            if (!managerSpaces.error && managerSpaces.data) {
-              setSpaces(managerSpaces.data.managerSpaces);
-            }
+  //           const managerSpaces = await _managerSpaces.refetch();
 
-            break;
-          case 'USER':
-            const joinedSpaces = await _joinedSpaces.refetch();
+  //           if (!managerSpaces.error && managerSpaces.data) {
+  //             setSpaces(managerSpaces.data.managerSpaces);
+  //           }
 
-            if (!joinedSpaces.error && joinedSpaces.data) {
-              setSpaces(joinedSpaces.data.joinedSpaces);
-            }
+  //           break;
+  //         case 'USER':
+  //           const joinedSpaces = await _joinedSpaces.refetch();
 
-            break;
-          default:
-            break;
-        }
-      }
-    };
+  //           if (!joinedSpaces.error && joinedSpaces.data) {
+  //             setSpaces(joinedSpaces.data.joinedSpaces);
+  //           }
 
-    handler().catch((err) => {
-      console.error(err);
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  //           break;
+  //         default:
+  //           break;
+  //       }
+  //     }
+  //   };
+
+  //   handler().catch((err) => {
+  //     console.error(err);
+  //   });
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, []);
 
   const [accountMenuAnchorEl, setAccountMenuAnchorEl] =
     useState<HTMLElement | null>(null);
@@ -202,29 +193,67 @@ const DashboardLayout: React.FC<Props> = ({
               </NextLink>
             </Box>
             <Box sx={{ flexGrow: 1 }}>
-              <ListItem>
-                <ListItemText>
-                  {isManager ? 'Managed' : 'Joined'}&nbsp;spaces
-                </ListItemText>
-              </ListItem>
-              {spaces.map((s) => (
-                <NextLink key={s.id} href={`/space/${s.id}`}>
-                  <ListItemButton type="item" selected={s.id === spaceId}>
-                    <ListItemText>{s.name}</ListItemText>
-                  </ListItemButton>
-                </NextLink>
-              ))}
-              <Divider />
-              {isManager && (
-                <NextLink href="/space/new">
-                  <ListItemButton type="category">
-                    <ListItemIcon>
-                      <AddIcon />
-                    </ListItemIcon>
-                    <ListItemText>Create new space</ListItemText>
-                  </ListItemButton>
-                </NextLink>
-              )}
+              {isManager ? (
+                <>
+                  <ListItem>
+                    <ListItemText>Managed spaces</ListItemText>
+                  </ListItem>
+                  {!_managerSpaces.error ? (
+                    !_managerSpaces.loading ? (
+                      _managerSpaces.data?.managerSpaces.map((s) => (
+                        <NextLink key={s.id} href={`/space/${s.id}`}>
+                          <ListItemButton
+                            type="item"
+                            selected={s.id === spaceId}
+                          >
+                            <ListItemText>{s.name}</ListItemText>
+                          </ListItemButton>
+                        </NextLink>
+                      ))
+                    ) : (
+                      <Loader />
+                    )
+                  ) : (
+                    <ErrorDisplay error={_managerSpaces.error} />
+                  )}
+                  <NextLink href="/space/new">
+                    <ListItemButton type="category">
+                      <ListItemIcon>
+                        <AddIcon />
+                      </ListItemIcon>
+                      <ListItemText>Create new space</ListItemText>
+                    </ListItemButton>
+                  </NextLink>
+                  <Divider />
+                </>
+              ) : null}
+              <>
+                {!_joinedSpaces.error ? (
+                  !_joinedSpaces.loading ? (
+                    _joinedSpaces.data?.joinedSpaces.length ? (
+                      <>
+                        <ListItem>
+                          <ListItemText>Joined spaces</ListItemText>
+                        </ListItem>
+                        {_joinedSpaces.data.joinedSpaces.map((s) => (
+                          <NextLink key={s.id} href={`/space/${s.id}`}>
+                            <ListItemButton
+                              type="item"
+                              selected={s.id === spaceId}
+                            >
+                              <ListItemText>{s.name}</ListItemText>
+                            </ListItemButton>
+                          </NextLink>
+                        ))}
+                      </>
+                    ) : null
+                  ) : (
+                    <Loader />
+                  )
+                ) : (
+                  <ErrorDisplay error={_joinedSpaces.error} />
+                )}
+              </>
             </Box>
             <Box sx={{ flexGrow: 0 }}>
               {!_userInfo.loading ? (

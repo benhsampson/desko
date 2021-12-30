@@ -102,7 +102,7 @@ const SpacePage: NextPage<Props> = ({ url, prettyUrl, spaceId }) => {
     if (bookOut.data?.book.errors?.length) {
       sb.handleOpen();
     }
-  }, [bookOut.data?.book.errors]);
+  }, [bookOut.data?.book.errors, sb]);
 
   const theme = useTheme();
   const matches = useMediaQuery(theme.breakpoints.down('sm'));

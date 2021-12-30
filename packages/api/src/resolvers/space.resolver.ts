@@ -81,6 +81,8 @@ export class SpaceResolver {
   @Query(() => Space)
   @Authorized()
   async spaceInfo(@Arg('spaceId') spaceId: string): Promise<Space> {
+    // TODO: Check that we have joined/are a manager of this space.
+
     return this.spaceRepository.findOneOrFail(spaceId);
   }
 
@@ -96,10 +98,6 @@ export class SpaceResolver {
       { code },
       { relations: ['users'] }
     );
-
-    if (user.roles.map((r) => r.value).includes('MANAGER')) {
-      return { space };
-    }
 
     if (!space) {
       return {
@@ -119,7 +117,7 @@ export class SpaceResolver {
   }
 
   @Query(() => [Space])
-  @Authorized('USER')
+  @Authorized()
   async joinedSpaces(@Ctx() ctx: Context): Promise<Space[]> {
     const userId = getUserIdFromContextOrFail(ctx);
     const user = await this.userRepository.findOneOrFail(userId);
