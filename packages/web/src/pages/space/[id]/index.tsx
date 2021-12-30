@@ -1,14 +1,12 @@
 import { NextPage } from 'next';
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useEffect } from 'react';
 import {
   AppBar,
   Box,
   IconButton,
-  InputAdornment,
   Snackbar,
   Stack,
   StackProps,
-  TextField,
   Toolbar,
   useTheme,
   useMediaQuery,
@@ -23,6 +21,7 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import EditIcon from '@mui/icons-material/Edit';
 import CloseIcon from '@mui/icons-material/Close';
 import AddIcon from '@mui/icons-material/Add';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import {
   CalendarContainer,
   CalendarDateActions,
@@ -35,7 +34,6 @@ import getCtxQueryVar from '../../../lib/utils/getCtxQueryVar';
 import withApollo from '../../../lib/utils/withApollo';
 import withAuth from '../../../lib/utils/withAuth';
 import {
-  GetBookingsQuery,
   useSpaceDataQuery,
   useBookMutation,
   useCancelBookingMutation,
@@ -46,7 +44,7 @@ import Loader from '../../../components/Loader';
 import useCopyToClipboard from 'packages/web/src/lib/utils/useCopyToClipboard';
 import { NextLinkComposed } from 'packages/web/src/components/Link';
 import ErrorDisplay from 'packages/web/src/components/ErrorDisplay';
-import useSnackbar from 'packages/web/src/lib/utils/useSnackbar';
+import useOpenState from 'packages/web/src/lib/utils/useOpenState';
 
 type Props = {
   url: string;
@@ -98,7 +96,9 @@ const SpacePage: NextPage<Props> = ({ url, prettyUrl, spaceId }) => {
   const [, copy] = useCopyToClipboard();
   const linkText = `${prettyUrl}/invite/${data?.spaceInfo.code || ''}`;
 
-  const sb = useSnackbar();
+  const sb = useOpenState();
+  const bookModal = useOpenState();
+  const inviteModal = useOpenState();
 
   useEffect(() => {
     if (bookOut.data?.book.errors?.length) {
@@ -108,8 +108,6 @@ const SpacePage: NextPage<Props> = ({ url, prettyUrl, spaceId }) => {
 
   const theme = useTheme();
   const matches = useMediaQuery(theme.breakpoints.down('sm'));
-
-  const [isBookModalOpen, setIsBookModalOpen] = useState(false);
 
   return (
     <DashboardLayout cancelBorder>
@@ -139,17 +137,14 @@ const SpacePage: NextPage<Props> = ({ url, prettyUrl, spaceId }) => {
             minHeight: '100vh',
           }}
         >
-          <Dialog
-            onClose={() => setIsBookModalOpen(false)}
-            open={isBookModalOpen}
-          >
+          <Dialog onClose={bookModal.handleClose} open={bookModal.isOpen}>
             <DialogTitle>Book Spaces</DialogTitle>
             <DialogContent>
               <DialogContentText>{`To book a space, simply click on the day you'd like to book in the Day/Month view.`}</DialogContentText>
             </DialogContent>
           </Dialog>
           <Fab
-            onClick={() => setIsBookModalOpen(true)}
+            onClick={bookModal.handleOpen}
             color="primary"
             sx={{
               position: 'absolute',
@@ -180,32 +175,57 @@ const SpacePage: NextPage<Props> = ({ url, prettyUrl, spaceId }) => {
                 {!loading ? (
                   isManager ? (
                     <ToolbarItem>
-                      <TextField
-                        disabled
-                        value={linkText}
-                        variant="outlined"
-                        size="small"
-                        InputProps={{
-                          endAdornment: (
-                            <InputAdornment position="end">
-                              <IconButton
-                                onClick={() =>
-                                  void copy(
-                                    `${url}/invite/${data.spaceInfo.code}`
-                                  )
-                                }
-                              >
-                                <ContentCopyIcon />
-                              </IconButton>
-                            </InputAdornment>
-                          ),
-                        }}
-                        sx={{
-                          '.MuiInputBase-input': {
-                            width: `${linkText.length}ch`,
-                          },
-                        }}
-                      />
+                      <Dialog
+                        open={inviteModal.isOpen}
+                        onClose={inviteModal.handleClose}
+                      >
+                        <DialogTitle>Invite Users</DialogTitle>
+                        <DialogContent>
+                          <Box
+                            sx={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              lineHeight: 0,
+                              border: (theme) =>
+                                `1px solid ${theme.palette.divider}`,
+                              borderRadius: (theme) =>
+                                `${theme.shape.borderRadius}px`,
+                              color: (theme) => theme.palette.text.secondary,
+                              p: (theme) => theme.spacing(0, 2),
+                              width: '100%',
+                              mb: 2,
+                            }}
+                          >
+                            <Box component="span" sx={{ flexGrow: 1 }}>
+                              {linkText}
+                            </Box>
+                            <IconButton
+                              onClick={() =>
+                                void copy(
+                                  `${url}/invite/${data.spaceInfo.code}`
+                                )
+                              }
+                            >
+                              <ContentCopyIcon />
+                            </IconButton>
+                          </Box>
+                          <DialogContentText gutterBottom>
+                            To add users, simply send this link to people who
+                            need to use this space.
+                          </DialogContentText>
+                          <DialogContentText>
+                            Users will have full visibility of all bookings and
+                            the ability to book days for themselves, except for
+                            days before today.
+                          </DialogContentText>
+                        </DialogContent>
+                      </Dialog>
+                      <Button
+                        onClick={inviteModal.handleOpen}
+                        startIcon={<PersonAddIcon />}
+                      >
+                        Invite Users
+                      </Button>
                       <Button
                         component={NextLinkComposed}
                         color="inherit"

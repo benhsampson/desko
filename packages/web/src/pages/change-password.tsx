@@ -1,4 +1,4 @@
-import { Button, IconButton, Snackbar, Stack } from '@mui/material';
+import { Button, Snackbar, Stack } from '@mui/material';
 import { useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
@@ -7,7 +7,7 @@ import AuthLayout from '../components/AuthLayout';
 import ErrorList from '../components/ErrorList';
 import PasswordTextField from '../components/PasswordTextField';
 import { partitionErrors } from '../lib/utils/partitionErrors';
-import useSnackbar from '../lib/utils/useSnackbar';
+import useSnackbar from '../lib/utils/useOpenState';
 import withApollo from '../lib/utils/withApollo';
 import {
   ChangePasswordIn,
