@@ -26,7 +26,7 @@ const Header = styled('header')(({ theme }) => ({
 }));
 
 const Content = styled('div')(({ theme }) => ({
-  maxWidth: 480,
+  maxWidth: 550,
   margin: '0 auto',
   display: 'flex',
   minHeight: '100vh',

@@ -72,7 +72,7 @@ const TableBody = styled(MuiTableBody, {
 
 const TableRow = styled(MuiTableRow)({
   display: 'grid',
-  gridTemplateColumns: 'repeat(7, 1fr)',
+  gridTemplateColumns: 'repeat(7, minmax(0, 1fr))',
 });
 
 const TableCell = styled(MuiTableCell, {

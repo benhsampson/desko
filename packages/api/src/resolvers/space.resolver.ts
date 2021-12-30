@@ -83,7 +83,9 @@ export class SpaceResolver {
   async spaceInfo(@Arg('spaceId') spaceId: string): Promise<Space> {
     // TODO: Check that we have joined/are a manager of this space.
 
-    return this.spaceRepository.findOneOrFail(spaceId);
+    return this.spaceRepository.findOneOrFail(spaceId, {
+      relations: ['manager'],
+    });
   }
 
   @Mutation(() => JoinSpaceOut)

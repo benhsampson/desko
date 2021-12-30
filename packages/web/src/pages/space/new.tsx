@@ -27,6 +27,7 @@ const SpaceNewPage = () => {
   const onSubmit: SubmitHandler<CreateSpaceIn> = async (input) => {
     const { errors, data } = await createSpace({
       variables: input,
+      refetchQueries: ['ManagerSpaces'],
     });
 
     if (errors) return console.error(errors);

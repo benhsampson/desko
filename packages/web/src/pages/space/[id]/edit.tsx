@@ -1,4 +1,5 @@
 import { NextPage } from 'next';
+import { useRouter } from 'next/router';
 import { Box, Button, Stack, TextField, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
@@ -23,6 +24,8 @@ type Props = {
 };
 
 const SpaceEditPage: NextPage<Props> = ({ spaceId }) => {
+  const router = useRouter();
+
   const spaceInfo = useSpaceInfoQuery({
     variables: { spaceId },
   });
@@ -94,6 +97,8 @@ const SpaceEditPage: NextPage<Props> = ({ spaceId }) => {
       // Reset dirty form state.
       reset(data.updateSpace.space);
     }
+
+    void router.push(`/space/${spaceId}`);
   };
 
   return (

@@ -3,7 +3,7 @@ import {
   List,
   ListItem as MuiListItem,
   ListItemButton as MuiListItemButton,
-  ListItemText,
+  ListItemText as MuiListItemText,
   Popover as MuiPopover,
   styled,
 } from '@mui/material';
@@ -19,8 +19,16 @@ type Props = {
   maxRows?: number;
 };
 
-const ListItem = styled(MuiListItem)(({ theme }) => ({
-  backgroundColor: theme.palette.primary.main,
+type ListItemProps = {
+  isMine?: boolean;
+};
+
+const ListItem = styled(MuiListItem, {
+  shouldForwardProp: (prop) => prop !== 'isMine',
+})<ListItemProps>(({ theme, isMine }) => ({
+  backgroundColor: isMine
+    ? theme.palette.secondary.main
+    : theme.palette.primary.main,
   color: theme.palette.primary.contrastText,
   borderRadius: theme.shape.borderRadius,
   padding: theme.spacing(0, 1),
@@ -33,6 +41,14 @@ const ListItem = styled(MuiListItem)(({ theme }) => ({
 const ListItemButton = styled(MuiListItemButton)(({ theme }) => ({
   padding: theme.spacing(0.125, 1),
 }));
+
+const ListItemText = styled(MuiListItemText)({
+  span: {
+    textOverflow: 'ellipsis',
+    overflow: 'hidden',
+    whiteSpace: 'nowrap',
+  },
+});
 
 const POPOVER_WIDTH = 240;
 
@@ -56,7 +72,7 @@ export default function CalendarEventList({ maxRows = 5, ...props }: Props) {
   const renderEventItems = (events: CalendarEvent[]) => (
     <>
       {events.map((event, index) => (
-        <ListItem key={`EventListItem${index}`}>
+        <ListItem key={`EventListItem${index}`} isMine={event.canDelete}>
           <ListItemText primary={event.name} />
           {event.canDelete ? (
             <IconButton

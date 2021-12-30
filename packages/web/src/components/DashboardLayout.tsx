@@ -60,7 +60,7 @@ const ListItemButton = styled(MuiListItemButton, {
       }
     : type === 'item'
     ? {
-        padding: theme.spacing(0.25, 2),
+        padding: theme.spacing(0.25, 4),
         color: theme.palette.text.secondary,
       }
     : {}),
@@ -224,7 +224,6 @@ const DashboardLayout: React.FC<Props> = ({
                       <ListItemText>Create new space</ListItemText>
                     </ListItemButton>
                   </NextLink>
-                  <Divider />
                 </>
               ) : null}
               <>

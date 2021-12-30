@@ -12,6 +12,9 @@ query SpaceData($spaceId: String!, $start: String!, $end: String!) {
     name
     maxBookingsPerDay
     code
+    manager {
+      id
+    }
   }
   getBookings(spaceId: $spaceId, input: { start: $start, end: $end }) {
     date

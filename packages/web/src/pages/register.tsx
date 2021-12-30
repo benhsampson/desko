@@ -57,11 +57,15 @@ function RegisterPage() {
 
   return (
     <AuthLayout
-      mainHeading={isUser ? 'Get started to proceed.' : 'Get started for free.'}
+      mainHeading={
+        isUser
+          ? 'Get started to proceed.'
+          : 'Start managing your space for free.'
+      }
       subHeading={
         isUser
           ? 'Create an account to start booking desks.'
-          : 'Manage your space for free. No credit card needed.'
+          : 'No credit card needed.'
       }
       headerContent={
         <>

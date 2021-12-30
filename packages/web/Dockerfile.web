@@ -15,6 +15,7 @@ COPY --from=base /app/base/packages/web/package.json ./packages/web/
 COPY --from=base /app/base/packages/calendar/package.json ./packages/calendar/
 COPY --from=base /app/base/packages/web/.env.local ./
 COPY --from=base /app/base/packages/web/.next/ ./packages/web/.next/
+COPY --from=base /app/base/packages/web/public/ ./packages/web/public/
 COPY --from=base /app/base/packages/calendar/dist/ ./packages/calendar/dist/
 COPY --from=base /app/base/node_modules/ ./node_modules/
 COPY --from=base /app/base/packages/web/next.config.js ./packages/web/

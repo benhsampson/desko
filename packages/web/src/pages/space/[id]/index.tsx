@@ -57,6 +57,7 @@ const SpacePage: NextPage<Props> = ({ url, prettyUrl, spaceId }) => {
   const prevEnd = useRef<string>('');
   const { error, loading, data, refetch } = useSpaceDataQuery({
     variables: { spaceId, start: '', end: '' },
+    pollInterval: 5000,
   });
   const [book, bookOut] = useBookMutation({
     refetchQueries: ['SpaceData'],
@@ -90,7 +91,9 @@ const SpacePage: NextPage<Props> = ({ url, prettyUrl, spaceId }) => {
     />
   );
 
-  const isManager = data?.userInfo.roles[0].value === 'MANAGER';
+  const isManager =
+    data?.userInfo.roles[0].value === 'MANAGER' &&
+    data.spaceInfo.manager.id === data.userInfo.id;
   // const isUser = data?.userInfo.roles[0].value === 'USER';
 
   const [, copy] = useCopyToClipboard();
@@ -222,6 +225,7 @@ const SpacePage: NextPage<Props> = ({ url, prettyUrl, spaceId }) => {
                       </Dialog>
                       <Button
                         onClick={inviteModal.handleOpen}
+                        variant="outlined"
                         startIcon={<PersonAddIcon />}
                       >
                         Invite Users
@@ -229,6 +233,7 @@ const SpacePage: NextPage<Props> = ({ url, prettyUrl, spaceId }) => {
                       <Button
                         component={NextLinkComposed}
                         color="inherit"
+                        variant="outlined"
                         to={`/space/${spaceId}/edit`}
                         startIcon={<EditIcon />}
                       >
