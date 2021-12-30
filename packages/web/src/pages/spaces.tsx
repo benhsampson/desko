@@ -21,16 +21,27 @@ const SpacesPage = () => {
             </Typography>
             {isManager ? (
               <>
+                <Typography gutterBottom>
+                  {'Click "+ Create new space" to get started. '}
+                </Typography>
                 <Typography>
-                  {'Click "+ Create new space" to get started.'}
+                  After you create the space, click the invite button to
+                  generate a unique URL for the space and send it to people who
+                  need to use this space.
                 </Typography>
               </>
             ) : (
-              <Typography>
-                {
-                  'Click one of your joined spaces to get started or ask your space manager for a link.'
-                }
-              </Typography>
+              <>
+                <Typography gutterBottom>
+                  Click one of your joined spaces to get started or ask your
+                  space manager for a link.
+                </Typography>
+                <Typography>
+                  Click any date on the calendar to book a desk for the day,
+                  except for days before today. Switch between day and month
+                  views using the &quot;DAY&quot; and &quot;MONTH&quot; buttons.
+                </Typography>
+              </>
             )}
           </>
         ) : (
