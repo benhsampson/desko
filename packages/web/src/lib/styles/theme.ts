@@ -14,6 +14,15 @@ declare module '@mui/material/styles' {
   }
 }
 
-const theme = createTheme();
+const theme = createTheme({
+  typography: {
+    body1: {
+      fontSize: '1rem',
+    },
+    body2: {
+      fontSize: '1rem',
+    },
+  },
+});
 
 export default theme;

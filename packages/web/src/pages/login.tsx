@@ -72,7 +72,7 @@ function LoginPage() {
       }
       headerContent={
         <>
-          Don&apos;t have an account?&nbsp;
+          Are you managing a space?&nbsp;
           <Link
             href={{ pathname: '/register', ...(code && { query: { code } }) }}
           >

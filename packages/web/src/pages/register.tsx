@@ -61,7 +61,7 @@ function RegisterPage() {
       subHeading={
         isUser
           ? 'Create an account to join this space.'
-          : 'Free forever. No credit card needed.'
+          : 'Get started to manage your space for free. No credit card needed.'
       }
       headerContent={
         <>
