@@ -39,6 +39,7 @@ import {
   useSpaceDataQuery,
   useBookMutation,
   useCancelBookingMutation,
+  SpaceDataQuery,
 } from '../../../__generated__/graphql';
 import DashboardLayout from '../../../components/DashboardLayout';
 import Loader from '../../../components/Loader';
@@ -71,7 +72,7 @@ const SpacePage: NextPage<Props> = ({ url, prettyUrl, spaceId }) => {
   }, [spaceId, refetch]);
 
   const bookingSlotToEventSlot = (
-    slot: GetBookingsQuery['getBookings'][number]
+    slot: SpaceDataQuery['getBookings'][number]
   ) => ({
     date: slot.date,
     events: slot.bookings.map((b) => ({
@@ -80,6 +81,7 @@ const SpacePage: NextPage<Props> = ({ url, prettyUrl, spaceId }) => {
       canDelete: b.canCancel ?? false,
     })),
     canCreate: slot.isAvailable ?? undefined,
+    isMaxed: slot.isMaxed ?? undefined,
   });
 
   const ToolbarItem = ({ ...toolbarItemProps }: StackProps) => (

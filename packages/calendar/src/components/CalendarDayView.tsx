@@ -7,6 +7,7 @@ import {
   TableCell as MuiTableCell,
   styled,
   ButtonBase,
+  Chip,
 } from '@mui/material';
 import moment from 'moment';
 import { useEffect } from 'react';
@@ -42,6 +43,12 @@ const TableCell = styled(MuiTableCell)(({ theme }) => ({
   height: '100%',
 }));
 
+const MaxedFlag = styled(Chip)({
+  position: 'absolute',
+  top: 4,
+  right: 8,
+});
+
 export default function CalendarDayView(props: CalendarViewProps) {
   const dispatch = useDispatch();
   const date = useSelector(selectDate);
@@ -72,7 +79,16 @@ export default function CalendarDayView(props: CalendarViewProps) {
       <Table stickyHeader>
         <TableHead>
           <TableRow>
-            <TableCell>{moment(date).format('dddd, MMMM Do YYYY')}</TableCell>
+            <TableCell>
+              {moment(date).format('dddd, MMMM Do YYYY')}
+              {slot?.isMaxed ? (
+                <MaxedFlag
+                  color="warning"
+                  variant="outlined"
+                  label="Fully Booked"
+                />
+              ) : null}
+            </TableCell>
           </TableRow>
         </TableHead>
         <TableBody>

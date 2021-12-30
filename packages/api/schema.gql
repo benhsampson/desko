@@ -29,6 +29,7 @@ type BookingSlot {
   bookings: [Booking!]!
   date: String!
   isAvailable: Boolean
+  isMaxed: Boolean
   space: Space!
 }
 

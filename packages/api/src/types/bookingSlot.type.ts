@@ -15,4 +15,7 @@ export class BookingSlot {
 
   @Field({ nullable: true })
   isAvailable?: boolean;
+
+  @Field({ nullable: true })
+  isMaxed?: boolean;
 }

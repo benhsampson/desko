@@ -61,6 +61,15 @@ export class BookingResolver implements ResolverInterface<BookingSlot> {
     return existingBookingsCount < bookingSlot.space.maxBookingsPerDay;
   }
 
+  @FieldResolver()
+  async isMaxed(@Root() bookingSlot: BookingSlot) {
+    const existingBookingsCount = await this.bookingRepo.getCountOnDay(
+      bookingSlot.space,
+      bookingSlot.date
+    );
+    return existingBookingsCount >= bookingSlot.space.maxBookingsPerDay;
+  }
+
   @Mutation(() => BookOut)
   @Authorized()
   async book(

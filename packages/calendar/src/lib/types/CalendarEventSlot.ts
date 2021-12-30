@@ -4,4 +4,5 @@ export type CalendarEventSlot = {
   date: string;
   events: CalendarEvent[];
   canCreate?: boolean;
+  isMaxed?: boolean;
 };

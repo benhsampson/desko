@@ -2,6 +2,7 @@ query GetBookings($spaceId: String!, $start: String!, $end: String!) {
   getBookings(spaceId: $spaceId, input: { start: $start, end: $end }) {
     date
     isAvailable
+    isMaxed
     bookings {
       id
       date

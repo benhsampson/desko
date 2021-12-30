@@ -2,6 +2,7 @@ import moment, { MomentInput } from 'moment';
 import { useEffect, useState } from 'react';
 import {
   Box,
+  Chip,
   TableContainer,
   Table as MuiTable,
   TableHead as MuiTableHead,
@@ -100,6 +101,12 @@ const DayNumber = styled(Box)(({ theme }) => ({
   fontFamily: 'monospace',
   padding: theme.spacing(0.5, 0),
 }));
+
+const MaxedFlag = styled(Chip)({
+  position: 'absolute',
+  top: 8,
+  right: 8,
+});
 
 const smallestNumberGreaterThanOrEqualToNDivisibleByK = (
   n: number,
@@ -239,6 +246,14 @@ export default function CalendarMonthView(props: CalendarViewProps) {
           maxRows={3}
           handleDeleteEvent={props.deleteEvent}
         />
+        {eventSlot?.isMaxed ? (
+          <MaxedFlag
+            color="warning"
+            label="Fully Booked"
+            size="small"
+            variant="outlined"
+          />
+        ) : null}
       </TableCell>
     );
   };
