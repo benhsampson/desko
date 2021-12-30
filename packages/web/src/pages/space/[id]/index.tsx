@@ -45,6 +45,7 @@ import Loader from '../../../components/Loader';
 import useCopyToClipboard from 'packages/web/src/lib/utils/useCopyToClipboard';
 import { NextLinkComposed } from 'packages/web/src/components/Link';
 import ErrorDisplay from 'packages/web/src/components/ErrorDisplay';
+import useSnackbar from 'packages/web/src/lib/utils/useSnackbar';
 
 type Props = {
   url: string;
@@ -95,15 +96,11 @@ const SpacePage: NextPage<Props> = ({ url, prettyUrl, spaceId }) => {
   const [, copy] = useCopyToClipboard();
   const linkText = `${prettyUrl}/invite/${data?.spaceInfo.code || ''}`;
 
-  const [sbOpen, setSbOpen] = useState(false);
-
-  const handleSbClose = () => {
-    setSbOpen(false);
-  };
+  const sb = useSnackbar();
 
   useEffect(() => {
     if (bookOut.data?.book.errors?.length) {
-      setSbOpen(true);
+      sb.handleOpen();
     }
   }, [bookOut.data?.book.errors]);
 
@@ -115,12 +112,12 @@ const SpacePage: NextPage<Props> = ({ url, prettyUrl, spaceId }) => {
   return (
     <DashboardLayout cancelBorder>
       <Snackbar
-        open={sbOpen}
+        open={sb.isOpen}
         autoHideDuration={5000}
-        onClose={handleSbClose}
+        onClose={sb.handleClose}
         message="Day at full capacity. Try another time."
         action={
-          <IconButton size="small" color="inherit" onClick={handleSbClose}>
+          <IconButton size="small" color="inherit" onClick={sb.handleClose}>
             <CloseIcon fontSize="small" />
           </IconButton>
         }

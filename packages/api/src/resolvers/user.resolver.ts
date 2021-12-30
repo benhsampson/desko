@@ -126,10 +126,14 @@ export class UserResolver {
     }
 
     const userId = getUserIdFromContextOrFail(ctx);
+    const user = await this.userRepository.findOneOrFail(userId);
+
+    if (!(await argon2.verify(user.password, input.oldPassword))) {
+      return { errors: [{ message: 'Old password is not correct' }] };
+    }
 
     const hashedPassword = await argon2.hash(input.newPassword);
 
-    const user = await this.userRepository.findOneOrFail(userId);
     await this.userRepository.updatePasswordAndSave(user, hashedPassword);
 
     return {};

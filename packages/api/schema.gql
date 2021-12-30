@@ -35,6 +35,7 @@ type BookingSlot {
 input ChangePasswordIn {
   newPassword: String!
   newPasswordConfirm: String!
+  oldPassword: String!
 }
 
 type ChangePasswordOut {

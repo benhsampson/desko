@@ -36,6 +36,9 @@ export class RefreshTokenIn {
 @InputType()
 export class ChangePasswordIn {
   @Field()
+  oldPassword!: string;
+
+  @Field()
   newPassword!: string;
 
   @Field()

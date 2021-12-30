@@ -27,6 +27,7 @@ export const loginSchema: yup.SchemaOf<LoginIn> = yup
 
 export const changePasswordSchema: yup.SchemaOf<ChangePasswordIn> = yup
   .object({
+    oldPassword: yup.string().defined(),
     newPassword: passwordSchema.defined(),
     newPasswordConfirm: yup
       .string()
