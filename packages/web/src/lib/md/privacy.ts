@@ -81,8 +81,6 @@ Persistent cookie consists of a text file sent by the website to your web browse
 
 Session cookies, on the other hand, expire at the end of your browser session, when the web browser is closed. We use both session cookies and persistent cookies on the website to improve the user experience of the website and store details including:
 
-- Your location; country, state and suburb
-- Your last search term and settings
 - User authentication
 - Live chat settings
 - Analytics

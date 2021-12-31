@@ -3,7 +3,6 @@ import {
   AppBar,
   Avatar,
   Box,
-  Divider,
   Drawer,
   IconButton,
   List,

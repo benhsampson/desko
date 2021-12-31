@@ -1,3 +1,4 @@
+import { CookieOptions } from 'express';
 import { AuthenticationError } from 'apollo-server-errors';
 import { GraphQLError } from 'graphql';
 import * as jwt from 'jsonwebtoken';
@@ -11,7 +12,7 @@ import {
 } from '../constants';
 import { Context } from '../types/Context';
 
-// const IS_PROD = process.env.NODE_ENV === 'production';
+const IS_PROD = process.env.NODE_ENV === 'production';
 
 const generateTokens = (payload: object) => {
   if (!process.env.ACCESS_TOKEN_SECRET || !process.env.REFRESH_TOKEN_SECRET) {
@@ -49,13 +50,19 @@ const generateUserTokens = (userId: string) =>
 const getRefreshTokenKey = (userId: string) =>
   `${REFRESH_TOKEN_REDIS_PREFIX}:${userId}`;
 
+const cookieOptions: CookieOptions = {
+  httpOnly: false,
+  secure: IS_PROD,
+  domain: process.env.COOKIE_DOMAIN,
+};
+
 export const deleteRefreshTokenCookieAndAssociation = async (
   ctx: Context,
   userId: string
 ) => {
   await ctx.redis.del(getRefreshTokenKey(userId));
 
-  ctx.res.clearCookie(REFRESH_TOKEN_COOKIE_NAME);
+  ctx.res.clearCookie(REFRESH_TOKEN_COOKIE_NAME, cookieOptions);
 };
 
 export const validateRefreshToken = async (
@@ -84,13 +91,7 @@ export const authenticate = async (ctx: Context, userId: string) => {
 
   await ctx.redis.set(getRefreshTokenKey(userId), refreshToken);
 
-  ctx.res.cookie(REFRESH_TOKEN_COOKIE_NAME, refreshToken, {
-    httpOnly: false,
-    // TODO: Change once HTTPS is in place
-    // secure: IS_PROD,
-    secure: false,
-    domain: process.env.COOKIE_DOMAIN,
-  });
+  ctx.res.cookie(REFRESH_TOKEN_COOKIE_NAME, refreshToken, cookieOptions);
 
   console.log('NEW REFRESH TOKEN', refreshToken);
 
