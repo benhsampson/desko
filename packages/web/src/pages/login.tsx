@@ -64,7 +64,7 @@ function LoginPage() {
 
   return (
     <AuthLayout
-      mainHeading={isUser ? 'Sign in to proceed.' : 'Sign in to desko.io.'}
+      mainHeading={isUser ? 'Log in to proceed.' : 'Sign in to desko.io.'}
       subHeading={
         isUser
           ? 'Enter your details below to start booking desks.'
@@ -118,7 +118,7 @@ function LoginPage() {
             size="large"
             variant="contained"
           >
-            Login
+            Log In
           </Button>
         </Stack>
       </form>

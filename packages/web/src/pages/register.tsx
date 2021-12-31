@@ -106,7 +106,7 @@ function RegisterPage() {
             size="large"
             variant="contained"
           >
-            Register
+            Create Account
           </Button>
         </Stack>
       </form>
