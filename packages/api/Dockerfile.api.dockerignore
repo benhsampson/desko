@@ -11,3 +11,4 @@
 !packages/api/.env.development.local
 !packages/api/tsconfig.json
 !packages/api/src/
+!packages/api/mailKey.json

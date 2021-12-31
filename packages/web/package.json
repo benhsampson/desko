@@ -41,7 +41,8 @@
     "next-transpile-modules": "^9.0.0",
     "nookies": "^2.5.2",
     "querystring": "^0.2.1",
-    "react-hook-form": "^7.20.0"
+    "react-hook-form": "^7.20.0",
+    "react-markdown": "^7.1.1"
   },
   "peerDependencies": {
     "@mui/icons-material": "*",

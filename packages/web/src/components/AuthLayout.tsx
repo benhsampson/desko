@@ -6,7 +6,7 @@ import { NextLinkComposed } from './Link';
 
 type Props = {
   mainHeading: string;
-  subHeading: string;
+  subHeading?: string;
   headerContent?: React.ReactNode;
 };
 
@@ -57,9 +57,11 @@ const AuthLayout: React.FC<Props> = ({
             <Typography variant="h4" gutterBottom>
               {mainHeading}
             </Typography>
-            <Typography sx={{ color: 'text.secondary' }}>
-              {subHeading}
-            </Typography>
+            {subHeading ? (
+              <Typography sx={{ color: 'text.secondary' }}>
+                {subHeading}
+              </Typography>
+            ) : null}
           </Box>
           {children}
         </Content>

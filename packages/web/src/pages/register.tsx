@@ -116,7 +116,7 @@ function RegisterPage() {
         sx={{ color: 'text.secondary', mt: 3 }}
       >
         By registering, I agree to the desko.io&nbsp;
-        <Link href="/terms">Terms of Service</Link>
+        <Link href="/terms">Terms of Use</Link>
         &nbsp;and&nbsp;
         <Link href="/privacy">Privacy Policy</Link>.
       </Typography>
