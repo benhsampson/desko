@@ -103,7 +103,7 @@ export default function CalendarDayView(props: CalendarViewProps) {
             >
               <CalendarEventList
                 events={slot?.events || []}
-                maxRows={3}
+                maxRows={12}
                 handleDeleteEvent={props.deleteEvent}
               />
             </TableCell>

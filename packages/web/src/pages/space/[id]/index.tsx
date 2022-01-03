@@ -202,15 +202,16 @@ const SpacePage: NextPage<Props> = ({ url, prettyUrl, spaceId }) => {
                             <Box component="span" sx={{ flexGrow: 1 }}>
                               {linkText}
                             </Box>
-                            <IconButton
+                            <Button
                               onClick={() =>
                                 void copy(
                                   `${url}/invite/${data.spaceInfo.code}`
                                 )
                               }
+                              startIcon={<ContentCopyIcon />}
                             >
-                              <ContentCopyIcon />
-                            </IconButton>
+                              Copy
+                            </Button>
                           </Box>
                           <DialogContentText gutterBottom>
                             To add users, simply send this link to people who
