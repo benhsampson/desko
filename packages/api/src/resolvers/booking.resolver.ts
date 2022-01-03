@@ -175,22 +175,33 @@ export class BookingResolver implements ResolverInterface<BookingSlot> {
       return booking;
     });
 
-    const groupedBookings = bookings.reduce((slots, booking) => {
-      let slotIndex = slots.findIndex((slot) => {
-        return Date.parse(slot.date) === Date.parse(booking.date);
-      });
+    const groupedBookings = bookings
+      .reduce((slots, booking) => {
+        let slotIndex = slots.findIndex((slot) => {
+          return Date.parse(slot.date) === Date.parse(booking.date);
+        });
 
-      if (slotIndex === -1) {
-        const newSlot = new BookingSlot();
-        newSlot.date = booking.date;
-        newSlot.space = booking.space;
-        newSlot.bookings = [];
-        slotIndex = slots.push(newSlot) - 1;
-      }
+        if (slotIndex === -1) {
+          const newSlot = new BookingSlot();
+          newSlot.date = booking.date;
+          newSlot.space = booking.space;
+          newSlot.bookings = [];
+          slotIndex = slots.push(newSlot) - 1;
+        }
 
-      slots[slotIndex].bookings.push(booking);
-      return slots;
-    }, [] as BookingSlot[]);
+        slots[slotIndex].bookings.push(booking);
+        return slots;
+      }, [] as BookingSlot[])
+      .map((slot) => ({
+        ...slot,
+        bookings: slot.bookings.sort((a) => {
+          if (a.user.id === userId) {
+            return -1;
+          }
+
+          return 1;
+        }),
+      }));
 
     return groupedBookings;
   }

@@ -12,7 +12,7 @@ const SpacesPage = () => {
     data?.userInfo.roles.findIndex((r) => r.value === 'MANAGER') !== -1;
 
   return (
-    <DashboardLayout openByDefault>
+    <DashboardLayout>
       <Box sx={{ p: 4 }}>
         {!loading ? (
           <>
