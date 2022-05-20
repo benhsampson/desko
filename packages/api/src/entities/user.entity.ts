@@ -1,11 +1,13 @@
 import { Field, ObjectType } from 'type-graphql';
 import {
   Column,
+  CreateDateColumn,
   Entity,
   JoinTable,
   ManyToMany,
   OneToMany,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { Booking } from './booking.entity';
 import { Role } from './role.entity';
@@ -40,4 +42,10 @@ export class User {
 
   @OneToMany(() => Booking, (booking) => booking.user)
   bookings!: Booking[];
+
+  @CreateDateColumn()
+  createdAt!: Date;
+
+  @UpdateDateColumn()
+  updatedAt!: Date;
 }
